@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { format } from "date-fns"
@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { ChevronRight, ChevronLeft, Menu, Search, X } from "lucide-react"
 
 interface DocTreeNode {
@@ -40,19 +40,22 @@ interface DocsLayoutProps {
   }
 }
 
-export default function DocsLayout({
-                                     children,
-                                     docTree,
-                                     toc,
-                                     title,
-                                     lastUpdated,
-                                     breadcrumbs,
-                                     prevNext,
-                                   }: DocsLayoutProps) {
+export function DocsLayout({ children, docTree, toc, title, lastUpdated, breadcrumbs, prevNext }: DocsLayoutProps) {
   const pathname = usePathname()
   const [visibleHeadings, setVisibleHeadings] = useState<Set<string>>(new Set())
   const [searchQuery, setSearchQuery] = useState("")
   const [filteredTree, setFilteredTree] = useState<DocTreeNode[]>(docTree)
+
+  // Indicator position state
+  const [indicatorStyle, setIndicatorStyle] = useState({
+    top: 0,
+    height: 0,
+    opacity: 0
+  })
+
+  // Refs for TOC items and container
+  const tocItemRefs = useRef<Map<string, HTMLAnchorElement>>(new Map())
+  const tocContainerRef = useRef<HTMLDivElement>(null)
 
   // Filter doc tree based on search query
   useEffect(() => {
@@ -135,7 +138,7 @@ export default function DocsLayout({
         })
       },
       {
-        rootMargin: "-80px 0px -50% 0px", // Adjust for better visibility calculation
+        rootMargin: "-80px 0px -20% 0px", // Adjust for better visibility calculation
         threshold: [0, 0.25, 0.5, 0.75, 1],
       },
     )
@@ -151,10 +154,65 @@ export default function DocsLayout({
     }
   }, [toc])
 
+  // Update indicator position based on visible headings
+  useEffect(() => {
+    if (visibleHeadings.size === 0 || !tocContainerRef.current) {
+      setIndicatorStyle({ top: 0, height: 0, opacity: 0 })
+      return
+    }
+
+    // Get all active TOC items
+    const activeItemIds = toc
+      .filter(item => isTocItemActive(item))
+      .map(item => item.id)
+
+    if (activeItemIds.length === 0) {
+      setIndicatorStyle({ top: 0, height: 0, opacity: 0 })
+      return
+    }
+
+    // Get refs to actual DOM elements
+    const activeElements = activeItemIds
+      .map(id => tocItemRefs.current.get(id))
+      .filter(Boolean) as HTMLAnchorElement[]
+
+    if (activeElements.length === 0) {
+      return
+    }
+
+    // Calculate container offset
+    const containerRect = tocContainerRef.current.getBoundingClientRect()
+
+    // Find top-most and bottom-most elements
+    const firstElement = activeElements[0]
+    const lastElement = activeElements[activeElements.length - 1]
+
+    const firstRect = firstElement.getBoundingClientRect()
+    const lastRect = lastElement.getBoundingClientRect()
+
+    // Calculate top position relative to container
+    const top = firstRect.top - containerRect.top
+
+    // Calculate total height covering all active elements
+    const height = (lastRect.top + lastRect.height) - firstRect.top
+
+    // Update the indicator style with animation (handled by CSS transition)
+    setIndicatorStyle({
+      top,
+      height,
+      opacity: 1
+    })
+  }, [visibleHeadings, toc])
+
+  const normalizePath = (path :string | undefined) => {
+    if (!path) return '';
+    return path.endsWith('/') ? path.slice(0, -1) : path;
+  };
+
   // Render document tree recursively
   const renderDocTree = (nodes: DocTreeNode[], level = 0) => {
     return nodes.map((node) => {
-      const isActive = node.url === pathname
+      const isActive = normalizePath(pathname) === normalizePath(node.url);
 
       return (
         <div key={node.name} className={cn("pl-4", level > 0 && "border-l")}>
@@ -196,11 +254,19 @@ export default function DocsLayout({
     return false
   }
 
+  // Save reference to TOC item element
+  const setTocItemRef = (element: HTMLAnchorElement | null, id: string) => {
+    if (element) {
+      tocItemRefs.current.set(id, element)
+    }
+  }
+
   return (
     <div className="flex min-h-screen flex-col">
       {/* Mobile navigation */}
       <header className="sticky top-0 z-50 flex h-14 items-center gap-4 border-b bg-background px-4 sm:px-6 lg:hidden">
         <Sheet>
+          <SheetTitle className="hidden"></SheetTitle>
           <SheetTrigger asChild>
             <Button variant="outline" size="icon" className="mr-2">
               <Menu className="h-5 w-5" />
@@ -237,6 +303,7 @@ export default function DocsLayout({
         </Sheet>
         <div className="flex-1 text-center font-medium">{title}</div>
         <Sheet>
+          <SheetTitle className="hidden"></SheetTitle>
           <SheetTrigger asChild>
             <Button variant="outline" size="icon">
               <ChevronRight className="h-5 w-5" />
@@ -247,16 +314,26 @@ export default function DocsLayout({
             <div className="px-4 py-2 font-medium">On This Page</div>
             <ScrollArea className="h-[calc(100vh-8rem)] pb-10">
               <div className="px-4 py-2">
-                <div className="flex flex-col space-y-1">
+                <div className="flex flex-col space-y-1 relative" ref={tocContainerRef}>
+                  <div
+                    className="absolute left-[-12px] w-[3px] bg-primary rounded-full transition-all duration-300 ease-in-out"
+                    style={{
+                      top: `${indicatorStyle.top}px`,
+                      height: `${indicatorStyle.height}px`,
+                      opacity: indicatorStyle.opacity
+                    }}
+                  />
+
                   {toc.map((item) => (
                     <a
                       key={item.id}
+                      ref={(el) => setTocItemRef(el, item.id)}
                       href={`#${item.id}`}
                       className={cn(
                         "text-sm py-1 transition-colors hover:text-primary relative",
                         item.depth === 2 ? "pl-0" : `pl-${(item.depth - 2) * 4}`,
                         isTocItemActive(item)
-                          ? "font-medium text-primary before:absolute before:left-[-12px] before:top-0 before:h-full before:w-[3px] before:bg-primary before:rounded-full"
+                          ? "font-medium text-primary"
                           : "text-muted-foreground",
                       )}
                     >
@@ -370,16 +447,26 @@ export default function DocsLayout({
           <div className="h-14 border-b px-4 py-4 font-medium">On This Page</div>
           <ScrollArea className="h-[calc(100vh-3.5rem)]">
             <div className="px-4 py-4">
-              <div className="flex flex-col space-y-1">
+              <div className="flex flex-col space-y-1 relative" ref={tocContainerRef}>
+                <div
+                  className="absolute left-[-12px] w-[3px] bg-primary rounded-full transition-all duration-300 ease-in-out"
+                  style={{
+                    top: `${indicatorStyle.top}px`,
+                    height: `${indicatorStyle.height}px`,
+                    opacity: indicatorStyle.opacity
+                  }}
+                />
+
                 {toc.map((item) => (
                   <a
                     key={item.id}
+                    ref={(el) => setTocItemRef(el, item.id)}
                     href={`#${item.id}`}
                     className={cn(
                       "text-sm py-1 transition-colors hover:text-primary relative",
                       item.depth === 2 ? "pl-0" : `pl-${(item.depth - 2) * 4}`,
                       isTocItemActive(item)
-                        ? "font-medium text-primary before:absolute before:left-[-12px] before:top-0 before:h-full before:w-[3px] before:bg-primary before:rounded-full"
+                        ? "font-medium text-primary"
                         : "text-muted-foreground",
                     )}
                   >
@@ -420,7 +507,7 @@ export default function DocsLayout({
           {/* Main content */}
           <div className="prose prose-slate dark:prose-invert max-w-none">{children}</div>
 
-          {/* Previous/Next navigation for mobile view */}
+          {/* Previous/Next navigation */}
           {prevNext && (
             <div className="mt-12 flex items-center justify-between border-t pt-4">
               {prevNext.prev ? (
@@ -450,4 +537,3 @@ export default function DocsLayout({
     </div>
   )
 }
-

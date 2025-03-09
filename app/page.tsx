@@ -1,11 +1,6 @@
 import { getDocBySlug, getDocTree, getNextAndPrevDocs } from "@/lib/docs"
 import { DocsLayout } from "./docs-layout"
 
-// Add searchParams to match Next.js expectations
-interface HomePageProps {
-  searchParams: Promise<Record<string, string | string[] | undefined>>
-}
-
 // Add dynamic metadata generation
 export async function generateMetadata() {
   try {
@@ -31,9 +26,9 @@ export async function generateMetadata() {
   }
 }
 
-export default async function HomePage({ searchParams }: HomePageProps) {
+export default async function HomePage() {
   try {
-    const doc = await getDocBySlug("")
+    const doc = await getDocBySlug("", true)
 
     if (!doc) {
       return (

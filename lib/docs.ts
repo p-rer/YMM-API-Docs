@@ -85,13 +85,15 @@ function getAllFiles(dir: string): string[] {
 }
 
 // Get doc content by slug
-export async function getDocBySlug(slug: string) {
+export async function getDocBySlug(slug: string, isHome = false) {
   // Convert slug to file path
   let filePath = slug
 
   // Handle root path
   if (filePath === "") {
-    filePath = "index"
+    if (!isHome) {
+      filePath = "index"
+    }
   }
 
   // Convert hyphens back to spaces for file lookup
@@ -123,7 +125,7 @@ export async function getDocBySlug(slug: string) {
     const { data, content } = matter(fileContents)
 
     // Process markdown content
-    let contentHtml = ""
+    let contentHtml: string
     try {
       const processor = remark()
         .use(remarkParse)
@@ -142,9 +144,6 @@ export async function getDocBySlug(slug: string) {
     // Extract headings for table of contents separately
     let toc: { depth: number; text: string; id: string }[] = []
     try {
-      // Create a separate processor just for TOC extraction
-      const file = { data: {} }
-
       const tocProcessor = remark().use(remarkParse).use(extractHeadings)
 
       const result = await tocProcessor.process(content) as any
@@ -162,6 +161,7 @@ export async function getDocBySlug(slug: string) {
 
     // Determine title with proper prioritization: frontmatter > h1 > filename
     let title = data.title
+    let description = data.description
 
     if (!title) {
       // Try to extract from first h1
@@ -196,20 +196,23 @@ export async function getDocBySlug(slug: string) {
     }
 
     // Create breadcrumbs
-    const breadcrumbs = pathParts.map((part, index) => {
-      const label = part.replace(/-/g, " ")
-      const href = "/" + pathParts.slice(0, index + 1).join("/")
-      return { label, href }
-    })
+    let breadcrumbs: { label: string; href: string }[] = [];
+    if (!isHome)
+      breadcrumbs = pathParts.map((part, index) => {
+        const label = part.replace(/-/g, " ")
+        const href = "/" + pathParts.slice(0, index + 1).join("/")
+        return { label, href }
+      })
 
     return {
       slug,
       title,
+      description,
       content: contentHtml,
       toc,
       lastUpdated,
       breadcrumbs,
-      frontmatter: data,
+      frontmatter: data
     }
   } catch (error) {
     console.error(`Error processing ${slug}:`, error)
@@ -227,8 +230,8 @@ export async function getDocTree() {
     const pathParts = relativePath.split(path.sep)
     const fileName = pathParts.pop() || ""
 
-    // Skip non-markdown files
-    if (!fileName.endsWith(".md")) continue
+    // Skip non-markdown files and home
+    if (!fileName.endsWith(".md") || fileName === ".md") continue
 
     // Read frontmatter for title
     const fileContents = fs.readFileSync(file, "utf8")
