@@ -1,3 +1,4 @@
+import { execSync } from "child_process"
 import fs from "fs"
 import path from "path"
 import matter from "gray-matter"
@@ -182,9 +183,29 @@ export async function getDocBySlug(slug: string, isHome = false) {
       }
     }
 
-    // Get last updated date
-    const stats = fs.statSync(fullPath)
-    const lastUpdated = stats.mtime
+    // Get last updated date (from Git if possible, fallback to file stats)
+    let lastUpdated
+    try {
+      // Get last commit time for the file
+      const gitTime = execSync(
+        `git log -1 --format="%at" -- "${fullPath}"`
+      ).toString().trim()
+
+      // Check if Git history is available
+      if (gitTime && gitTime.length > 0) {
+        // Convert Unix timestamp to JavaScript date
+        lastUpdated = new Date(parseInt(gitTime, 10) * 1000)
+      } else {
+        // Use file system stats as fallback
+        const stats = fs.statSync(fullPath)
+        lastUpdated = stats.mtime
+      }
+    } catch (error) {
+      // Use file system stats as fallback
+      console.warn(`Could not get Git history for ${fullPath}:`, error)
+      const stats = fs.statSync(fullPath)
+      lastUpdated = stats.mtime
+    }
 
     // Get relative path for breadcrumbs
     const relativePath = path.relative(DOCS_DIRECTORY, fullPath)
