@@ -6,6 +6,9 @@ import { remark } from "remark"
 import remarkGfm from "remark-gfm"
 import remarkParse from "remark-parse"
 import remarkRehype from "remark-rehype"
+import remarkMath from 'remark-math'
+import rehypeKatex from 'rehype-katex'
+import rehypeShiki from '@shikijs/rehype'
 import rehypeStringify from "rehype-stringify"
 import rehypeSlug from "rehype-slug"
 import { visit } from "unist-util-visit"
@@ -130,8 +133,13 @@ export async function getDocBySlug(slug: string, isHome = false) {
     try {
       const processor = remark()
         .use(remarkParse)
+        .use(remarkMath)
         .use(remarkGfm)
         .use(remarkRehype, { allowDangerousHtml: true })
+        .use(rehypeShiki, {
+          theme: 'aurora-x'
+        })
+        .use(rehypeKatex)
         .use(rehypeSlug)
         .use(rehypeStringify, { allowDangerousHtml: true })
 

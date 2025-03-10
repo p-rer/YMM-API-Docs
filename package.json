@@ -37,6 +37,7 @@
     "@radix-ui/react-toggle": "^1.1.1",
     "@radix-ui/react-toggle-group": "^1.1.1",
     "@radix-ui/react-tooltip": "^1.1.6",
+    "@shikijs/rehype": "^3.1.0",
     "@tailwindcss/typography": "latest",
     "autoprefixer": "^10.4.20",
     "child_process": "latest",
@@ -58,10 +59,12 @@
     "react-hook-form": "^7.54.1",
     "react-resizable-panels": "^2.1.7",
     "recharts": "2.15.0",
+    "rehype-katex": "^7.0.1",
     "rehype-slug": "latest",
     "rehype-stringify": "latest",
     "remark": "latest",
     "remark-gfm": "latest",
+    "remark-math": "^6.0.0",
     "remark-parse": "latest",
     "remark-rehype": "latest",
     "sonner": "^1.7.1",
@@ -78,6 +81,7 @@
     "eslint": "^9.22.0",
     "eslint-config-next": "^15.2.1",
     "postcss": "^8",
+    "shiki": "^3.1.0",
     "tailwindcss": "^3.4.17",
     "typescript": "^5"
   }

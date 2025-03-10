@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { ChevronRight, ChevronLeft, Menu, Search, X } from "lucide-react"
+import { ThemeToggle } from "@/components/theme-toggle"
 
 interface DocTreeNode {
   name: string
@@ -268,7 +269,7 @@ export function DocsLayout({ children, docTree, toc, title, lastUpdated, breadcr
         <Sheet>
           <SheetTitle className="hidden"></SheetTitle>
           <SheetTrigger asChild>
-            <Button variant="outline" size="icon" className="mr-2">
+            <Button variant="ghost" size="icon" className="mr-2">
               <Menu className="h-5 w-5" />
               <span className="sr-only">Toggle navigation menu</span>
             </Button>
@@ -301,11 +302,12 @@ export function DocsLayout({ children, docTree, toc, title, lastUpdated, breadcr
             </ScrollArea>
           </SheetContent>
         </Sheet>
-        <div className="flex-1 text-center font-medium">{title}</div>
+        <div className="flex-1 text-left font-medium">{title}</div>
+        <ThemeToggle />
         <Sheet>
           <SheetTitle className="hidden"></SheetTitle>
           <SheetTrigger asChild>
-            <Button variant="outline" size="icon">
+            <Button variant="ghost" size="icon">
               <ChevronRight className="h-5 w-5" />
               <span className="sr-only">Toggle table of contents</span>
             </Button>
@@ -351,7 +353,7 @@ export function DocsLayout({ children, docTree, toc, title, lastUpdated, breadcr
       <div className="hidden lg:flex">
         {/* Left sidebar (document tree) */}
         <div className="fixed inset-y-0 left-0 w-64 border-r bg-background">
-          <div className="flex h-14 items-center border-b px-4">
+          <div className="flex h-14 items-center px-4">
             <Link href="/" className="flex items-center space-x-2">
               <span className="font-bold">Documentation</span>
             </Link>
@@ -444,8 +446,8 @@ export function DocsLayout({ children, docTree, toc, title, lastUpdated, breadcr
 
         {/* Right sidebar (table of contents) */}
         <div className="fixed inset-y-0 right-0 w-64 border-l bg-background">
-          <div className="h-14 border-b px-4 py-4 font-medium">On This Page</div>
-          <ScrollArea className="h-[calc(100vh-3.5rem)]">
+          <div className="h-14 px-4 py-4 font-medium">On This Page</div>
+          <ScrollArea className="h-[calc(100vh-6.5rem)]">
             <div className="px-4 py-4">
               <div className="flex flex-col space-y-1 relative" ref={tocContainerRef}>
                 <div
@@ -476,6 +478,7 @@ export function DocsLayout({ children, docTree, toc, title, lastUpdated, breadcr
               </div>
             </div>
           </ScrollArea>
+          <ThemeToggle className="m-2" />
         </div>
       </div>
 
