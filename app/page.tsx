@@ -1,5 +1,6 @@
 import { getDocBySlug, getDocTree, getNextAndPrevDocs } from "@/lib/docs"
 import { DocsLayout } from "./docs-layout"
+import { generateOgImageStatic } from "@/lib/og";
 
 // Add dynamic metadata generation
 export async function generateMetadata() {
@@ -12,10 +13,13 @@ export async function generateMetadata() {
         description: "Static documentation site home page",
       }
     }
-
+    const imageDataUri = await generateOgImageStatic("Home", "");
     return {
       title: doc.title,
       description: doc.frontmatter.description || `${doc.title} - Documentation`,
+      openGraph: {
+        images: [imageDataUri]
+      }
     }
   } catch (error) {
     console.error("Error generating homepage metadata:", error)

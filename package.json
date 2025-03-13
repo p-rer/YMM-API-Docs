@@ -67,6 +67,8 @@
     "remark-math": "^6.0.0",
     "remark-parse": "latest",
     "remark-rehype": "latest",
+    "satori": "^0.12.1",
+    "sharp": "^0.33.5",
     "sonner": "^1.7.1",
     "tailwind-merge": "^2.5.5",
     "tailwindcss": "latest",

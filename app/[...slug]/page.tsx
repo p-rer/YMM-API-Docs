@@ -28,13 +28,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata | un
     if (!doc) {
       return
     }
+    const imageDataUri = await generateOgImageStatic(doc.title, format(doc.lastUpdated, "MMMM d, yyyy"));
 
     return {
       title: doc.title,
       description: doc.description,
       openGraph: {
-        images: [`/og?title=${doc.title}`],
-      },
+        images: [imageDataUri]
+      }
     }
   } catch (error) {
     console.log(error)
@@ -42,6 +43,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata | un
 }
 
 import { DocsLayout } from "../docs-layout"
+import {generateOgImageStatic} from "@/lib/og";
+import {format} from "date-fns";
 
 export default async function DocPage({ params }: Props) {
   try {
