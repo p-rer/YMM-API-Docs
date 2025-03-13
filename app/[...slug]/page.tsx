@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation"
 import { getAllDocPaths, getDocBySlug, getDocTree, getNextAndPrevDocs } from "@/lib/docs"
 import type { Metadata } from "next"
+import {generateOgImageStatic} from "@/lib/og";
+import {format} from "date-fns";
 
 type Props = {
   params: Promise<{ slug: string[] }>
@@ -11,7 +13,9 @@ export async function generateStaticParams() {
   const paths = getAllDocPaths()
 
   // Filter out the root path as it's handled by the root page.tsx
-  return paths.map((path) => {
+  return paths
+    .filter(path => path !== "")
+    .map((path) => {
     if (path === "") {
       return { slug: [] };
     }
@@ -22,6 +26,9 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata | undefined> {
   try {
+    if (!(await params).slug || (await params).slug.length === 0) {
+      return undefined;
+    }
     const slug = (await params).slug.join("/")
     const doc = await getDocBySlug(slug)
 
@@ -43,8 +50,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata | un
 }
 
 import { DocsLayout } from "../docs-layout"
-import {generateOgImageStatic} from "@/lib/og";
-import {format} from "date-fns";
 
 export default async function DocPage({ params }: Props) {
   try {
