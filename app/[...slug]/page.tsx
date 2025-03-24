@@ -75,4 +75,4 @@ export default async function DocPage({ params }: Props) {
     notFound()
   }
 }
-
+export const runtime = 'edge';
