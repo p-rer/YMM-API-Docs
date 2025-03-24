@@ -2,4 +2,4 @@
 
 ## 名前空間
 
-[YukkuriMovieMaker.Plugin](Plugin/index.md)
+[YukkuriMovieMaker.Plugin](Plugin/index)

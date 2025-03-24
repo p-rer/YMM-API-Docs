@@ -2,7 +2,7 @@
 
 ## 定義
 
-名前空間: [YukkuriMovieMaker.Plugin.Effects](../../index.md)
+名前空間: [YukkuriMovieMaker.Plugin.Effects](../../index)
 
 アセンブリ: YukkuriMovieMaker.Plugin.dll
 

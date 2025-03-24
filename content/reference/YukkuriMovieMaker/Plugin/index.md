@@ -2,4 +2,4 @@
 
 ## 名前空間
 
-[YukkuriMovieMaker.Plugin.Effects](Effects/index.md)
+[YukkuriMovieMaker.Plugin.Effects](Effects/index)

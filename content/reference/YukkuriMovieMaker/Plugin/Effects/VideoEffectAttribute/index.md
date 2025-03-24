@@ -2,13 +2,13 @@
 
 ## 定義
 
-名前空間: [YukkuriMovieMaker.Plugin.Effects](../index.md)
+名前空間: [YukkuriMovieMaker.Plugin.Effects](../index)
 
 アセンブリ: YukkuriMovieMaker.Plugin.dll
 
 <br/>
 
-映像エフェクトの名前、カテゴリーを設定し、[VideoEffectBase](../VideoEffectBase/index.md)に付与する属性です。
+映像エフェクトの名前、カテゴリーを設定し、[VideoEffectBase](../VideoEffectBase/index)に付与する属性です。
 
 ```csharp
 [AttributeUsage(AttributeTargets.Class)]  
@@ -23,7 +23,7 @@ public class VideoEffectAttribute : Attribute
 
 | 名前                                                                             | 説明                |
 | ------------------------------------------------------------------------------ | ----------------- |
-| [VideoEffectAttribute(string, string[], string[], bool, bool)](constructor.md) | 映像エフェクトの詳細を設定します。 |
+| [VideoEffectAttribute(string, string[], string[], bool, bool)](constructor) | 映像エフェクトの詳細を設定します。 |
 
 ## プロパティー
 
