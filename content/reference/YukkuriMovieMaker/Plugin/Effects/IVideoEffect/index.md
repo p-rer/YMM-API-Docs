@@ -1,0 +1,2 @@
+# IVideoEffect インターフェース
+

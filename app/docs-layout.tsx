@@ -139,8 +139,8 @@ export function DocsLayout({ children, docTree, toc, title, lastUpdated, breadcr
         })
       },
       {
-        rootMargin: "-80px 0px -20% 0px", // Adjust for better visibility calculation
-        threshold: [0, 0.25, 0.5, 0.75, 1],
+        rootMargin: "0px", // Adjust for better visibility calculation
+        threshold: 0,
       },
     )
 
@@ -316,7 +316,7 @@ export function DocsLayout({ children, docTree, toc, title, lastUpdated, breadcr
             <div className="px-4 py-2 font-medium">On This Page</div>
             <ScrollArea className="h-[calc(100vh-8rem)] pb-10">
               <div className="px-4 py-2">
-                <div className="flex flex-col space-y-1 relative" ref={tocContainerRef}>
+                <div className="flex flex-col space-y-1 relat ive" ref={tocContainerRef}>
                   <div
                     className="absolute left-[-12px] w-[3px] bg-primary rounded-full transition-all duration-300 ease-in-out"
                     style={{

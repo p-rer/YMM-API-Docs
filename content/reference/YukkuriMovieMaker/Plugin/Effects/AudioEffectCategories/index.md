@@ -1,0 +1,2 @@
+# AudioEffectCategories クラス
+

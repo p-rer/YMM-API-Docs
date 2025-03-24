@@ -1,0 +1,2 @@
+# AudioEffectBase クラス
+

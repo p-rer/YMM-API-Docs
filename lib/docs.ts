@@ -13,6 +13,7 @@ import rehypeStringify from "rehype-stringify"
 import rehypeSlug from "rehype-slug"
 import { visit } from "unist-util-visit"
 import { toString } from "mdast-util-to-string"
+import GithubSlugger from 'github-slugger'
 
 const DOCS_DIRECTORY = path.join(process.cwd(), "content")
 
@@ -24,31 +25,30 @@ function normalizePathForUrl(pathStr: string): string {
 // Extract headings for table of contents (h2 and h3 elements)
 function extractHeadings() {
   return (tree: any, file: any) => {
-    const headings: { depth: number; text: string; id: string }[] = []
+    const headings: { depth: number; text: string; id: string }[] = [];
+    // Create an instance of github-slugger to generate slugs following rehypeSlug rules
+    const slugger = new GithubSlugger();
 
-    // Make sure tree is valid before visiting
     if (tree && typeof tree === "object") {
       visit(tree, "heading", (node) => {
-        // Only include h2 and h3 headings (depth 2 and 3)
+        // Process only h2 and h3 headings (depth: 2, 3)
         if (node && node.children && (node.depth === 2 || node.depth === 3)) {
-          const text = toString(node)
-          const id = text
-            .toLowerCase()
-            .replace(/[^a-z0-9]+/g, "-")
-            .replace(/(^-|-$)/g, "")
+          const text = toString(node);
+          // Generate a slug based on the heading text using github-slugger
+          const slug = slugger.slug(text);
 
           headings.push({
             depth: node.depth,
             text,
-            id,
-          })
+            id: slug,
+          });
         }
-      })
+      });
     }
 
     // Store the headings in the file data
-    file.data.headings = headings
-  }
+    file.data.headings = headings;
+  };
 }
 
 // Get all doc paths
