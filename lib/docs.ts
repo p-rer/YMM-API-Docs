@@ -14,6 +14,8 @@ import rehypeSlug from "rehype-slug"
 import { visit } from "unist-util-visit"
 import { toString } from "mdast-util-to-string"
 import GithubSlugger from 'github-slugger'
+import { Plugin } from 'unified';
+import { Link } from 'mdast';
 
 const DOCS_DIRECTORY = path.join(process.cwd(), "content")
 
@@ -25,7 +27,7 @@ function normalizePathForUrl(pathStr: string): string {
 // Extract headings for table of contents (h2 and h3 elements)
 function extractHeadings() {
   return (tree: any, file: any) => {
-    const headings: { depth: number; text: string; id: string }[] = [];
+    const headings: { depth: number; text: string; id: string }[] = []
     // Create an instance of github-slugger to generate slugs following rehypeSlug rules
     const slugger = new GithubSlugger();
 
@@ -41,15 +43,44 @@ function extractHeadings() {
             depth: node.depth,
             text,
             id: slug,
-          });
+          })
         }
       });
     }
 
     // Store the headings in the file data
-    file.data.headings = headings;
+    file.data.headings = headings
   };
 }
+
+// Remark plugin that modifies link nodes.
+const remarkLinkModifier: Plugin = () => {
+  return (tree: any) => {
+    // Traverse all link nodes in the Markdown AST
+    visit(tree, 'link', (node: Link) => {
+      if (node.url) {
+        // Check if the URL is external by testing if it starts with "http://" or "https://"
+        const isExternal = /^(http|https):\/\//i.test(node.url);
+        if (isExternal) {
+          // For external links, add target and rel attributes for opening in a new tab securely.
+          if (!node.data) {
+            node.data = {};
+          }
+          if (!node.data.hProperties) {
+            node.data.hProperties = {};
+          }
+          node.data.hProperties.target = '_blank';
+          node.data.hProperties.rel = 'noopener noreferrer';
+        } else {
+          // For internal links, convert the URL to lowercase.
+          node.url = node.url.toLowerCase();
+        }
+      }
+    });
+  };
+};
+
+export default remarkLinkModifier;
 
 // Get all doc paths
 export function getAllDocPaths() {
@@ -133,6 +164,7 @@ export async function getDocBySlug(slug: string, isHome = false) {
     try {
       const processor = remark()
         .use(remarkParse)
+        .use(remarkLinkModifier)
         .use(remarkMath)
         .use(remarkGfm)
         .use(remarkRehype, { allowDangerousHtml: true })

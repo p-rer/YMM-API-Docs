@@ -2,13 +2,13 @@
 
 ## 定義
 
-名前空間: [YukkuriMovieMaker.Plugin.Effects](../index)
+名前空間: [YukkuriMovieMaker.Plugin.Effects](..)
 
 アセンブリ: YukkuriMovieMaker.Plugin.dll
 
 <br/>
 
-[VideoEffectBase](index) クラスの新しいインスタンスを初期化します。
+[VideoEffectBase](.) クラスの新しいインスタンスを初期化します。
 
 ```csharp
 public VideoEffectBase()

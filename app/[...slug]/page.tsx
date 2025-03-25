@@ -42,7 +42,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata | un
       title: doc.title,
       description: doc.description,
       openGraph: {
-        images: [imageDataUri]
+        images: [imageDataUri],
       }
     }
   } catch (error) {

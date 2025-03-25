@@ -2,13 +2,13 @@
 
 ## 定義
 
-名前空間: [YukkuriMovieMaker.Plugin.Effects](../index)
+名前空間: [YukkuriMovieMaker.Plugin.Effects](..)
 
 アセンブリ: YukkuriMovieMaker.Plugin.dll
 
 <br/>
 
-[VideoEffect](index)属性を初期化します。
+[VideoEffect](.)属性を初期化します。
 
 ```csharp
 VideoEffectAttribute(string name, string[] categories, string[] keywords, bool isEffectItemSupported = true, bool isAviUtlSupported = true)
