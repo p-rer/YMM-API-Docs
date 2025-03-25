@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation"
-import { getDocBySlug, getDocTree, getNextAndPrevDocs } from "@/lib/docs"
+import {getAllDocPaths, getDocBySlug, getDocTree, getNextAndPrevDocs} from "@/lib/docs"
 import type { Metadata } from "next"
 import {generateOgImageStatic} from "@/lib/og";
 import {format} from "date-fns";
@@ -7,6 +7,22 @@ import {format} from "date-fns";
 type Props = {
   params: Promise<{ slug: string[] }>
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}
+
+// Generate static params for all possible slug combinations
+export async function generateStaticParams() {
+  const paths = getAllDocPaths()
+
+  // Filter out the root path as it's handled by the root page.tsx
+  return paths
+    .filter(path => path !== "")
+    .map((path) => {
+      if (path === "") {
+        return { slug: [] };
+      }
+      const slugArray = path.split("/");
+      return { slug: slugArray };
+    });
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata | undefined> {
@@ -75,4 +91,3 @@ export default async function DocPage({ params }: Props) {
     notFound()
   }
 }
-export const runtime = 'edge';
