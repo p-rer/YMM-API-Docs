@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation"
-import {getAllDocPaths, getDocBySlug, getDocTree, getNextAndPrevDocs} from "@/lib/docs"
+import {/*getAllDocPaths, */getDocBySlug, getDocTree, getNextAndPrevDocs} from "@/lib/docs"
 import type { Metadata } from "next"
 import {generateOgImageStatic} from "@/lib/og";
 import {format} from "date-fns";
