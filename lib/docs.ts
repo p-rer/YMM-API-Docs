@@ -146,14 +146,14 @@ export async function getDocBySlug(slug: string, isHome = false) {
   let fullPath = ""
   for (const p of possiblePaths) {
     if (fs.existsSync(p)) {
+      console.log("Found file", p)
       fullPath = p
       break
     }
   }
 
-  console.log(fullPath)
-
   if (!fullPath) {
+    console.error(`No file found for ${slug}`)
     return null
   }
 
