@@ -151,6 +151,8 @@ export async function getDocBySlug(slug: string, isHome = false) {
     }
   }
 
+  console.log(fullPath)
+
   if (!fullPath) {
     return null
   }

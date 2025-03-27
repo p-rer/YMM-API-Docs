@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation"
-import {/*getAllDocPaths, */getDocBySlug, getDocTree, getNextAndPrevDocs} from "@/lib/docs"
+import {getAllDocPaths, getDocBySlug, getDocTree, getNextAndPrevDocs} from "@/lib/docs"
 import type { Metadata } from "next"
 import {generateOgImageStatic} from "@/lib/og";
 import {format} from "date-fns";
@@ -8,7 +8,7 @@ type Props = {
   params: Promise<{ slug: string[] }>
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }
-/*
+
 // Generate static params for all possible slug combinations
 export async function generateStaticParams() {
   const paths = getAllDocPaths()
@@ -24,7 +24,7 @@ export async function generateStaticParams() {
       return { slug: slugArray };
     });
 }
-*/
+
 export async function generateMetadata({ params }: Props): Promise<Metadata | undefined> {
   try {
     if (!(await params).slug || (await params).slug.length === 0) {
