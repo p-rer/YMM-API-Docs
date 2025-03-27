@@ -142,6 +142,7 @@ export async function getDocBySlug(slug: string, isHome = false) {
     path.join(DOCS_DIRECTORY, `${filePath}.md`),
     path.join(DOCS_DIRECTORY, filePath, "index.md"),
   ]
+  console.log("PossiblePaths:", possiblePaths)
 
   let fullPath = ""
   for (const p of possiblePaths) {
