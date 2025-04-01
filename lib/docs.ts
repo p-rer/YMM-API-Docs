@@ -146,11 +146,21 @@ export async function getDocBySlug(slug: string, isHome = false) {
 
   let fullPath = ""
   for (const p of possiblePaths) {
-    if (fs.existsSync(p)) {
-      console.log("Found file", p)
-      fullPath = p
+    const dir = path.dirname(p)
+    const fileName = path.basename(p)
+    fs.readdir(dir, (err, files) =>
+    {
+      if (err) {
+        console.error(err);
+        return;
+      }
+      if (files.some(name => name.toLowerCase() === fileName.toLowerCase())) {
+        console.log("Found file", p)
+        fullPath = p
+      }
+    })
+    if (fullPath)
       break
-    }
   }
 
   if (!fullPath) {
