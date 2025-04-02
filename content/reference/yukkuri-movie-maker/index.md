@@ -2,4 +2,4 @@
 
 ## 名前空間
 
-[YukkuriMovieMaker.Plugin](./Plugin)
+[YukkuriMovieMaker.Plugin](./plugin)

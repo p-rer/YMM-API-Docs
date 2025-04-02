@@ -2,4 +2,4 @@
 
 ## 名前空間
 
-[YukkuriMovieMaker.Plugin.Effects](./Effects)
+[YukkuriMovieMaker.Plugin.Effects](./effects)

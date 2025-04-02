@@ -4,20 +4,20 @@
 
 ## クラス
 
-[AudioEffectAttribute](./AudioEffectAttribute)
+[AudioEffectAttribute](./audio-effect-attribute)
 
-[AudioEffectBase](./AudioEffectBase)
+[AudioEffectBase](./audio-effect-base)
 
-[AudioEffectCategories](./AudioEffectCategories)
+[AudioEffectCategories](./audio-effect-categories)
 
-[VideoEffectAttribute](./VideoEffectAttribute)
+[VideoEffectAttribute](./video-effect-attribute)
 
-[VideoEffectBase](./VideoEffectBase)
+[VideoEffectBase](./video-effect-base)
 
-[VideoEffectCategories](./VideoEffectCategories)
+[VideoEffectCategories](./video-effect-categories)
 
 ## インターフェース
 
-[IAudioEffect](./IAudioEffect)
+[IAudioEffect](./iaudio-effect)
 
-[IVideoEffect](./IVideoEffect)
+[IVideoEffect](./ivideo-effect)

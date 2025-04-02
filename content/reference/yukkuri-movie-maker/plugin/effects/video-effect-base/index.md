@@ -16,7 +16,7 @@ public abstract class VideoEffectBase : YukkuriMovieMaker.Commons.Animatable, Yu
 
 継承 [Object](https://learn.microsoft.com/ja-jp/dotnet/api/system.object) → Bindable → ValidatableBindable → UndoRedoable → Animatable → VideoEffectBase
 
-実装 [IVideoEffect](../IVideoEffect), [INotifyPropertyChanged](https://learn.microsoft.com/ja-jp/dotnet/api/system.componentmodel.inotifypropertychanged), [INotifyDataErrorInfo](https://learn.microsoft.com/ja-jp/dotnet/api/system.componentmodel.inotifydataerrorinfo), IUndoRedoable, IEditable, Animatable, IFileItem, IResourceItem
+実装 [IVideoEffect](../ivideo-effect, [INotifyPropertyChanged](https://learn.microsoft.com/ja-jp/dotnet/api/system.componentmodel.inotifypropertychanged), [INotifyDataErrorInfo](https://learn.microsoft.com/ja-jp/dotnet/api/system.componentmodel.inotifydataerrorinfo), IUndoRedoable, IEditable, Animatable, IFileItem, IResourceItem
 
 ## コンストラクター
 
@@ -26,20 +26,20 @@ public abstract class VideoEffectBase : YukkuriMovieMaker.Commons.Animatable, Yu
 
 ## プロパティー
 
-| 名前                                                                                                              | 説明                        |
-| --------------------------------------------------------------------------------------------------------------- | ------------------------- |
-| [Label](./property/Label)         | エフェクトの名前を設定します。読み取り専用です。  |
-| [IsEnabled](./property/IsEnabled) | エフェクトの有効または無効を取得または設定します。 |
-| [Remark](./property/Remark)       | エフェクトについて備考を取得または設定します。   |
+| 名前                                 | 説明                        |
+|------------------------------------| ------------------------- |
+| [Label](./property/label)          | エフェクトの名前を設定します。読み取り専用です。  |
+| [IsEnabled](./property/is-enabled) | エフェクトの有効または無効を取得または設定します。 |
+| [Remark](./property/remark)        | エフェクトについて備考を取得または設定します。   |
 
 ## メソッド
 
 | 名前                                                                                    | 説明                                    |
-| ------------------------------------------------------------------------------------- | ------------------------------------- |
-| [Set<T\>(ref T, T, string, params string[])](./method/Set)                         | 参照渡しされたストレージに値を設定し、変更を通知します。          |
-| [Set<T\>(Expression<Func<T\>\>, T, string, params string[])](./method/Set)         | プロパティセレクターを使用してプロパティーに値を設定し、変更を通知します。 |
-| [CreateExoVideoFilters(int, ExoOutputDescription)](./method/CreateExoVideoFilters) | Exoとして出力する際に使用する文字列を生成します。            |
-| [CreateVideoEffect(IGraphicsDevicesAndContext)](./method/CreateVideoEffect)        | プロセッサーのインスタンスを生成します。                  |
+|---------------------------------------------------------------------------------------| ------------------------------------- |
+| [Set<T\>(ref T, T, string, params string[])](./method/set)                            | 参照渡しされたストレージに値を設定し、変更を通知します。          |
+| [Set<T\>(Expression<Func<T\>\>, T, string, params string[])](./method/set)            | プロパティセレクターを使用してプロパティーに値を設定し、変更を通知します。 |
+| [CreateExoVideoFilters(int, ExoOutputDescription)](./method/create-exo-video-filters) | Exoとして出力する際に使用する文字列を生成します。            |
+| [CreateVideoEffect(IGraphicsDevicesAndContext)](./method/create-video-effect)         | プロセッサーのインスタンスを生成します。                  |
 
 ## 明示的なインターフェイスの実装
 | 名前                                    | 説明                                     |

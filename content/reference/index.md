@@ -2,9 +2,9 @@
 
 ## 名前空間
 
-[YukkuriMovieMaker](./YukkuriMovieMaker)
+[YukkuriMovieMaker](./yukkuri-movie-maker)
 
-[YukkuriMovieMaker.Plugin](./YukkuriMovieMaker/Plugin)
+[YukkuriMovieMaker.Plugin](./yukkuri-movie-maker/plugin)
 	
-[YukkuriMovieMaker.Plugin.Effects](./YukkuriMovieMaker/Plugin/Effects)
+[YukkuriMovieMaker.Plugin.Effects](./yukkuri-movie-maker/plugin/effects)
 
