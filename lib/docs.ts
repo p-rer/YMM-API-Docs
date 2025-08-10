@@ -16,6 +16,7 @@ import { toString } from "mdast-util-to-string"
 import GithubSlugger from 'github-slugger'
 import { Plugin } from 'unified';
 import { Link } from 'mdast';
+import remarkWrapHeadings from "./remarkWrapHeadings"
 
 const DOCS_DIRECTORY = path.join(process.cwd(), "content")
 
@@ -154,7 +155,7 @@ export async function getDocBySlug(slug: string, isHome = false) {
   }
 
   if (!fullPath) {
-    console.error(`No file found for ${slug}`)
+    console.warn(`No file found for ${slug}`)
     return null
   }
 
@@ -170,12 +171,12 @@ export async function getDocBySlug(slug: string, isHome = false) {
         .use(remarkLinkModifier)
         .use(remarkMath)
         .use(remarkGfm)
+        .use(remarkWrapHeadings)
         .use(remarkRehype, { allowDangerousHtml: true })
         .use(rehypeShiki, {
           theme: 'aurora-x'
         })
         .use(rehypeKatex)
-        .use(rehypeSlug)
         .use(rehypeStringify, { allowDangerousHtml: true })
 
       const processedContent = await processor.process(content)
