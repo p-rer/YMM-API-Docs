@@ -21,7 +21,7 @@ export function TocIndicator({ indicatorStyle }: { indicatorStyle: { top: number
 
 interface TableOfContentsProps {
   toc: TocItem[]
-  tocContainerRef: React.RefObject<HTMLDivElement>
+  tocContainerRef: React.RefObject<HTMLDivElement | null>
   tocItemRefs: React.MutableRefObject<Map<string, HTMLAnchorElement>>
   isTocItemActive: (item: TocItem) => boolean
   setTocItemRef: (element: HTMLAnchorElement | null, id: string) => void

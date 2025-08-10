@@ -55,7 +55,7 @@ export function DocsLayout({ children, docTree, toc, title, lastUpdated, breadcr
   const [searchQuery, setSearchQuery] = useState("")
   const [isTreeHovered, setIsTreeHovered] = useState(false)
   const tocItemRefs = useRef<Map<string, HTMLAnchorElement>>(new Map())
-  const tocContainerRef = useRef<HTMLDivElement>(null)
+  const tocContainerRef = useRef<HTMLDivElement | null>(null)
 
   const filteredTree = useFilteredTree(docTree, searchQuery)
   const visibleHeadings = useVisibleHeadings(toc)

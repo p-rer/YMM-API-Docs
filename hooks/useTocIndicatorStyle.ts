@@ -10,7 +10,7 @@ export function useTocIndicatorStyle({
 }: {
   visibleHeadings: Set<string>
   toc: TocItem[]
-  tocContainerRef: React.RefObject<HTMLDivElement>
+  tocContainerRef: React.RefObject<HTMLDivElement | null>
   tocItemRefs: React.MutableRefObject<Map<string, HTMLAnchorElement>>
   isTocItemActive: (item: TocItem) => boolean
 }) {
