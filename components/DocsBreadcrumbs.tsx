@@ -8,6 +8,12 @@ const ELLIPSIS_WIDTH = 40
 const NAV_PADDING = 32
 const CHEVRON_WIDTH = 20
 
+function isEllipsisCrumb(
+  crumb: { label: string; href: string } | { label: string; href: string; isEllipsis: boolean }
+): crumb is { label: string; href: string; isEllipsis: boolean } {
+  return (crumb as any).isEllipsis === true;
+}
+
 export function DocsBreadcrumbs({ breadcrumbs }: { breadcrumbs: { label: string; href: string }[] }) {
   const [hiddenType, setHiddenType] = useState<"middle" | "start" | null>(null)
   const [showEllipsisMenu, setShowEllipsisMenu] = useState(false)
@@ -101,7 +107,8 @@ export function DocsBreadcrumbs({ breadcrumbs }: { breadcrumbs: { label: string;
       {displayBreadcrumbs.map((crumb, index) => (
         <div key={crumb.label + crumb.href + index} className="flex items-center relative">
           <ChevronRight className="h-4 w-4" />
-          {crumb.isEllipsis ? (
+          {isEllipsisCrumb(crumb) ? (
+            // ... ここはそのまま ...
             <>
               <button
                 ref={ellipsisBtnRef}
