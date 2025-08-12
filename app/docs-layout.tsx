@@ -5,7 +5,7 @@ import type React from "react"
 import { useState, useRef } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { ChevronRight, ChevronLeft, Menu } from "lucide-react"
+import { ChevronRight, ChevronLeft, Menu, GithubIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
@@ -23,6 +23,7 @@ import { useVisibleHeadings } from "../hooks/useVisibleHeadings"
 import { useIsTocItemActive } from "../hooks/useIsTocItemActive"
 import { useTocIndicatorStyle } from "../hooks/useTocIndicatorStyle"
 import { SITE_TITLE } from "@/lib/siteSetting"
+import { cn } from "@/lib/utils"
 
 interface DocTreeNode {
   name: string
@@ -46,13 +47,14 @@ interface DocsLayoutProps {
   title: string
   lastUpdated: Date
   breadcrumbs: { label: string; href: string }[]
+  githubRepoEditUrl: string | null
   prevNext?: {
     prev?: { slug: string; title: string }
     next?: { slug: string; title: string }
   }
 }
 
-export function DocsLayout({ children, docTree, toc, title, lastUpdated, breadcrumbs, prevNext }: DocsLayoutProps) {
+export function DocsLayout({ children, docTree, toc, title, lastUpdated, breadcrumbs, githubRepoEditUrl, prevNext }: DocsLayoutProps) {
   const pathname = usePathname()
   const [searchQuery, setSearchQuery] = useState("")
   const [isTreeHovered, setIsTreeHovered] = useState(false)
@@ -94,6 +96,14 @@ export function DocsLayout({ children, docTree, toc, title, lastUpdated, breadcr
           </SheetContent>
         </Sheet>
         <div className="flex-1 text-left font-medium">{title}</div>
+        {/* GitHub Edit Link */}
+        {githubRepoEditUrl && (
+          <Link href={githubRepoEditUrl} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground">
+            <GithubIcon className="h-5 w-5" />
+            <span className="sr-only">Edit on GitHub</span>
+          </Link>
+        )}
+        {/* Theme Toggle */}
         <ThemeToggle />
         {/* Mobile TOC (Sheet) */}
         <Sheet>
@@ -157,7 +167,16 @@ export function DocsLayout({ children, docTree, toc, title, lastUpdated, breadcr
           <div className="mx-auto max-w-3xl px-8 py-8">
             <DocsBreadcrumbs breadcrumbs={breadcrumbs} />
             <div className="mb-8">
-              <h1 className="text-3xl font-bold tracking-tight">{title}</h1>
+              <div className="flex items-center">
+                <h1 className="text-3xl font-bold tracking-tight">{title}</h1>
+                {/* GitHub Edit Link */}
+                {githubRepoEditUrl && (
+                  <Link href={githubRepoEditUrl} target="_blank" rel="noopener noreferrer" className="text-muted-foreground m-4 hover:text-foreground">
+                    <GithubIcon className="h-5 w-5" />
+                    <span className="sr-only">Edit on GitHub</span>
+                  </Link>
+                )}
+              </div>
               <LastUpdated lastUpdated={lastUpdated} />
             </div>
             <div className="prose prose-slate dark:prose-invert max-w-none">{children}</div>

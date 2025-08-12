@@ -18,6 +18,7 @@ import { Plugin } from 'unified';
 import { Link } from 'mdast';
 import remarkWrapHeadings from "./remarkWrapHeadings"
 import remarkRemoveFirstH1 from "./remarkRemoveFirstH1"
+import { GITHUB_REPO_BRANCH, GITHUB_REPO_NAME, GITHUB_REPO_USERNAME, IS_GITHUB_REPO_EDITABLE } from "./siteSetting"
 
 const DOCS_DIRECTORY = path.join(process.cwd(), "content")
 
@@ -277,7 +278,10 @@ export async function getDocBySlug(slug: string, isHome = false) {
       toc,
       lastUpdated,
       breadcrumbs,
-      frontmatter: data
+      frontmatter: data,
+      githubEditUrl: IS_GITHUB_REPO_EDITABLE
+       ? `https://github.com/${GITHUB_REPO_USERNAME}/${GITHUB_REPO_NAME}/edit/${GITHUB_REPO_BRANCH}/content/` + relativePath.replaceAll("\\", "/")
+        : null
     }
   } catch (error) {
     console.error(`Error processing ${slug}:`, error)

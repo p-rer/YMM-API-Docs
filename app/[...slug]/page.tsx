@@ -81,6 +81,7 @@ export default async function DocPage({ params }: Props) {
         title={doc.title}
         lastUpdated={doc.lastUpdated}
         breadcrumbs={doc.breadcrumbs}
+        githubRepoEditUrl={doc.githubEditUrl}
         prevNext={prevNext}
       >
         <div dangerouslySetInnerHTML={{ __html: doc.content }} />

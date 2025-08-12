@@ -2,15 +2,16 @@ import type React from "react"
 import "../styles/globals.css"
 import { Inter } from "next/font/google"
 import { ThemeProvider } from "@/components/theme-provider"
+import { SITE_DESCRIPTION, SITE_TITLE } from "@/lib/siteSetting"
 
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata = {
   title: {
-    template: "%s | Documentation",
-    default: "Documentation",
+    template: `%s | ${SITE_TITLE}`,
+    default: SITE_TITLE,
   },
-  description: "Static documentation website built with Next.js",
+  description: SITE_DESCRIPTION,
 }
 
 export default function RootLayout({
