@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react"
 
 export interface DocTreeNode {
-  name: string
+  name: string  
+  isExtended: boolean
   title?: string
   url?: string
   isIndex?: boolean
@@ -13,6 +14,7 @@ export function useFilteredTree(docTree: DocTreeNode[], searchQuery: string) {
 
   useEffect(() => {
     if (!searchQuery.trim()) {
+      docTree.forEach(node => ({ ...node, isExtended: false }))
       setFilteredTree(docTree)
       return
     }
@@ -21,11 +23,11 @@ export function useFilteredTree(docTree: DocTreeNode[], searchQuery: string) {
       const titleMatches = node.title?.toLowerCase().includes(query)
       const nameMatches = node.name.toLowerCase().includes(query)
       if (!node.children || node.children.length === 0) {
-        return titleMatches || nameMatches ? { ...node } : null
+        return titleMatches || nameMatches ? { ...node, isExtended: true } : null
       }
       const filteredChildren = node.children.map(filterNode).filter(Boolean) as DocTreeNode[]
       if (filteredChildren.length > 0 || titleMatches || nameMatches) {
-        return { ...node, children: filteredChildren }
+        return { ...node, isExtended: true, children: filteredChildren }
       }
       return null
     }

@@ -25,6 +25,7 @@ import { useTocIndicatorStyle } from "../hooks/useTocIndicatorStyle"
 
 interface DocTreeNode {
   name: string
+  isExtended: boolean
   title?: string
   url?: string
   isIndex?: boolean
@@ -130,7 +131,7 @@ export function DocsLayout({ children, docTree, toc, title, lastUpdated, breadcr
             width: isTreeHovered ? "calc(33.33vw)" : "16rem",
             maxWidth: "calc(33.33vw)",
             transition: "width 0.3s ease",
-            zIndex: 30, // かぶせるため
+            zIndex: 30,
           }}
           onMouseEnter={() => setIsTreeHovered(true)}
           onMouseLeave={() => setIsTreeHovered(false)}
