@@ -1,6 +1,7 @@
 import React from 'react';
 import satori from 'satori';
 import fs from 'fs';
+import { SITE_TITLE } from './siteSetting';
 
 export async function generateOgImageStatic(title: string, lastUpdate: string): Promise<string> {
   const fontData = fs.readFileSync('app/fonts/ZenOldMincho-Medium.ttf');
@@ -37,7 +38,7 @@ export async function generateOgImageStatic(title: string, lastUpdate: string): 
               marginRight: '8px'
             }}
           />
-          <span style={{ color: 'white', fontSize: '28px' }}>Documentation</span>
+          <span style={{ color: 'white', fontSize: '28px' }}>{SITE_TITLE}</span>
         </div>
 
         {/* Introduction text in center-left */}

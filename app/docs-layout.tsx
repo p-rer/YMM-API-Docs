@@ -22,6 +22,7 @@ import { useFilteredTree } from "../hooks/useFilteredTree"
 import { useVisibleHeadings } from "../hooks/useVisibleHeadings"
 import { useIsTocItemActive } from "../hooks/useIsTocItemActive"
 import { useTocIndicatorStyle } from "../hooks/useTocIndicatorStyle"
+import { SITE_TITLE } from "@/lib/siteSetting"
 
 interface DocTreeNode {
   name: string
@@ -138,7 +139,7 @@ export function DocsLayout({ children, docTree, toc, title, lastUpdated, breadcr
         >
           <div className="flex h-14 items-center px-4">
             <Link href="/" className="flex items-center space-x-2">
-              <span className="font-bold">Documentation</span>
+              <span className="font-bold">{SITE_TITLE}</span>
             </Link>
           </div>
           <div className="p-4">
