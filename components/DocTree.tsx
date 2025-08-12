@@ -74,7 +74,7 @@ export function DocTree({ nodes, pathname, level = 0, openPath }: DocTreeProps) 
                   onClick={() => handleToggle(node.name)}
                   className={cn(
                     "mr-1 rounded p-1 hover:bg-accent transition-colors",
-                    isOpen ? "text-foreground" : "text-muted-foreground"
+                    isOpen ? "font-semibold text-foreground" : "text-muted-foreground"
                   )}
                   tabIndex={0}
                 >
@@ -93,15 +93,15 @@ export function DocTree({ nodes, pathname, level = 0, openPath }: DocTreeProps) 
                   className={cn(
                     "block py-1 text-sm whitespace-nowrap transition-colors rounded",
                     isActive
-                      ? "font-semibold text-foreground bg-muted"
+                      ? "font-semibold text-foreground"
                       : "text-muted-foreground hover:text-foreground hover:bg-accent",
                   )}
-                  style={{ color: isActive ? "#222" : undefined }}
+                  
                 >
                   {node.title || node.name}
                 </Link>
               ) : (
-                <div className="py-1 text-sm font-semibold text-muted-foreground whitespace-nowrap">
+                <div className="py-1 text-sm text-muted-foreground whitespace-nowrap">
                   {node.title || node.name}
                 </div>
               )}
