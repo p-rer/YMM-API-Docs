@@ -17,6 +17,7 @@ import GithubSlugger from 'github-slugger'
 import { Plugin } from 'unified';
 import { Link } from 'mdast';
 import remarkWrapHeadings from "./remarkWrapHeadings"
+import remarkRemoveFirstH1 from "./remarkRemoveFirstH1"
 
 const DOCS_DIRECTORY = path.join(process.cwd(), "content")
 
@@ -143,12 +144,10 @@ export async function getDocBySlug(slug: string, isHome = false) {
     path.join(DOCS_DIRECTORY, `${filePath}.md`),
     path.join(DOCS_DIRECTORY, filePath, "index.md"),
   ]
-  console.log("PossiblePaths:", possiblePaths)
 
   let fullPath = ""
   for (const p of possiblePaths) {
     if (fs.existsSync(p)) {
-      console.log("Found file", p)
       fullPath = p
       break
     }
@@ -168,6 +167,7 @@ export async function getDocBySlug(slug: string, isHome = false) {
     try {
       const processor = remark()
         .use(remarkParse)
+        .use(remarkRemoveFirstH1)
         .use(remarkLinkModifier)
         .use(remarkMath)
         .use(remarkGfm)
