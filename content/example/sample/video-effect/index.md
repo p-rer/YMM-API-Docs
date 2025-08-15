@@ -1,5 +1,21 @@
 # 映像エフェクト
 
+## 必要なツール
+
+- .Net9 SDK
+- YMM4のdll群と本体
+- （推奨）C#開発環境
+
+## プロジェクト参照
+
+- `YukkuriMovieMaker.Controls.dll<`
+- `YukkuriMovieMaker.Plugin.dll`
+- `SharpGen.Runtime.dll`
+- `SharpGen.Runtime.COM.dll`
+- `Vortice.Direct2D1.dll`
+- `Vortice.DirectX.dll`
+- `Vortice.Mathematics.dll`
+
 ## 継承が必要なクラス
 
 - [VideoEffectBase](/reference/yukkuri-movie-maker/plugin/effects/video-effect-base/)
