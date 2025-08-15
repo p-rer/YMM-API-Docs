@@ -8,7 +8,7 @@
 
 ## プロジェクト参照
 
-- `YukkuriMovieMaker.Controls.dll<`
+- `YukkuriMovieMaker.Controls.dll`
 - `YukkuriMovieMaker.Plugin.dll`
 - `SharpGen.Runtime.dll`
 - `SharpGen.Runtime.COM.dll`
