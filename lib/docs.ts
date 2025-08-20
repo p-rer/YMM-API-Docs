@@ -10,7 +10,6 @@ import remarkMath from 'remark-math'
 import rehypeKatex from 'rehype-katex'
 import rehypeShiki from '@shikijs/rehype'
 import rehypeStringify from "rehype-stringify"
-import rehypeSlug from "rehype-slug"
 import { visit } from "unist-util-visit"
 import { toString } from "mdast-util-to-string"
 import GithubSlugger from 'github-slugger'
