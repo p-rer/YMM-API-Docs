@@ -48,7 +48,7 @@
     "cmdk": "1.0.4",
     "date-fns": "latest",
     "embla-carousel-react": "8.5.1",
-    "fs": "latest",
+    "github-slugger": "^2.0.0",
     "gray-matter": "latest",
     "input-otp": "1.4.1",
     "lucide-react": "^0.454.0",
@@ -79,6 +79,7 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
+    "@types/github-slugger": "^2.0.0",
     "@types/node": "^22.19.3",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
