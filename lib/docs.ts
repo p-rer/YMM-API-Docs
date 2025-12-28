@@ -261,11 +261,31 @@ export async function getDocBySlug(slug: string, isHome = false) {
     }
 
     // Create breadcrumbs
-    let breadcrumbs: { label: string; href: string }[] = [];
+    let breadcrumbs: { label: string; href: string | null }[] = [];
     if (!isHome)
       breadcrumbs = pathParts.map((part, index) => {
         const label = part.replace(/-/g, " ")
-        const href = "/" + pathParts.slice(0, index + 1).join("/")
+        let href : string | null = "/" + pathParts.slice(0, index + 1).join("/")
+
+        const filePathParts = href.split("/").map((part) => part.replace(/-/g, " "))
+        const filePathWithSpaces = filePathParts.join("/")
+        const possiblePaths = [
+          path.join(DOCS_DIRECTORY, `${filePathWithSpaces}.md`),
+          path.join(DOCS_DIRECTORY, filePathWithSpaces, "index.md"),
+          path.join(DOCS_DIRECTORY, `${href}.md`),
+          path.join(DOCS_DIRECTORY, href, "index.md"),
+        ]
+        let fullPath = ""
+        for (const p of possiblePaths) {
+          if (fs.existsSync(p)) {
+            fullPath = p
+            break
+          }
+        }
+        if (!fullPath) {
+          href = null
+        }
+
         return { label, href }
       })
 

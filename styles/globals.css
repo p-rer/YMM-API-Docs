@@ -109,4 +109,10 @@
   body {
     @apply bg-background text-foreground;
   }
+  table{
+    @apply overflow-x-scroll w-full block;
+  }
+  td {
+    @apply min-w-2xs
+  }
 }

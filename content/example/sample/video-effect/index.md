@@ -4,7 +4,7 @@
 
 ### 必要なツール
 
-- .Net9 SDK
+- .Net10 SDK
 - YMM4のdll群と本体
 - （推奨）C#開発環境
 
@@ -201,7 +201,7 @@ namespace YMM4SamplePlugin.VideoEffect.SampleD2DVideoEffect
 
 ### 必要なツール
 
-- .Net9 SDK
+- .Net10 SDK
 - HLSL コードコンパイラ（推奨：Visual StudioからインストールするWindows Kits内のfxc.exe）
 - YMM4のdll群と本体
 - （推奨）C#開発環境

@@ -3,6 +3,7 @@ import { DocsLayout } from "./docs-layout"
 import { generateOgImageStatic } from "@/lib/og";
 import { title } from "process";
 import { SITE_DESCRIPTION, SITE_TITLE } from "@/lib/siteSetting";
+import {Metadata} from "next";
 
 // Add dynamic metadata generation
 export async function generateMetadata() {

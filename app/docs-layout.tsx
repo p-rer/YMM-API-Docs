@@ -46,7 +46,7 @@ interface DocsLayoutProps {
   toc: TocItem[]
   title: string
   lastUpdated: Date
-  breadcrumbs: { label: string; href: string }[]
+  breadcrumbs: { label: string; href: string | null }[]
   githubRepoEditUrl: string | null
   prevNext?: {
     prev?: { slug: string; title: string }
@@ -84,7 +84,7 @@ export function DocsLayout({ children, docTree, toc, title, lastUpdated, breadcr
             </Button>
           </SheetTrigger>
           {/* FULL WIDTH FOR MOBILE */}
-          <SheetContent side="left" className="w-full max-w-full sm:w-full sm:max-w-full pr-0">
+          <SheetContent side="left" className="w-full max-w-full sm:w-full sm:max-w-xl pr-0">
             <div className="px-4 py-2">
               <SearchBox searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
             </div>
@@ -115,7 +115,7 @@ export function DocsLayout({ children, docTree, toc, title, lastUpdated, breadcr
             </Button>
           </SheetTrigger>
           {/* FULL WIDTH FOR MOBILE */}
-          <SheetContent side="right" className="w-full max-w-full sm:w-full sm:max-w-full">
+          <SheetContent side="right" className="w-full max-w-full sm:w-full sm:max-w-xl">
             <div className="px-4 py-2 font-medium">On This Page</div>
             <ScrollArea className="h-[calc(100vh-8rem)] pb-10">
               <div className="px-4 py-2">
