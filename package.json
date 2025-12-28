@@ -52,6 +52,7 @@
     "gray-matter": "latest",
     "input-otp": "1.4.1",
     "lucide-react": "^0.454.0",
+    "mdast": "^3.0.0",
     "mdast-util-to-string": "latest",
     "next": "^15.5.9",
     "next-themes": "^0.4.6",
@@ -75,6 +76,7 @@
     "tailwind-merge": "^2.6.0",
     "tailwindcss": "^4.1.18",
     "tailwindcss-animate": "^1.0.7",
+    "unified": "^11.0.5",
     "unist-util-visit": "latest",
     "zod": "^3.25.76"
   },
