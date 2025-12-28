@@ -3,15 +3,15 @@ import { ChevronRight, MoreHorizontal } from "lucide-react"
 import React, { useState, useRef, useEffect } from "react"
 
 function isEllipsisCrumb(
-    crumb: { label: string; href: string } | { label: string; href: string; isEllipsis: boolean }
-): crumb is { label: string; href: string; isEllipsis: boolean } {
+    crumb: { label: string; href: string | null } | { label: string; href: string | null; isEllipsis: boolean }
+): crumb is { label: string; href: string | null; isEllipsis: boolean } {
   return (crumb as any).isEllipsis === true;
 }
 
-export function DocsBreadcrumbs({ breadcrumbs }: { breadcrumbs: { label: string; href: string }[] }) {
+export function DocsBreadcrumbs({ breadcrumbs }: { breadcrumbs: { label: string; href: string | null }[] }) {
   const [hiddenType, setHiddenType] = useState<"middle" | "start" | null>(null)
   const [showEllipsisMenu, setShowEllipsisMenu] = useState(false)
-  const [ellipsisItems, setEllipsisItems] = useState<{ label: string, href: string }[]>([])
+  const [ellipsisItems, setEllipsisItems] = useState<{ label: string, href: string | null }[]>([])
   const [keepCount, setKeepCount] = useState(0)
   const navRef = useRef<HTMLDivElement>(null)
   const ellipsisBtnRef = useRef<HTMLButtonElement>(null)
