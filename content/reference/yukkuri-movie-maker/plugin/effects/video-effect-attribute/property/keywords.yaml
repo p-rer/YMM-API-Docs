@@ -1,0 +1,13 @@
+type: property
+title: "Keywords プロパティー"
+description: "エフェクトの検索キーワード"
+namespace: "YukkuriMovieMaker.Plugin.Effects"
+namespaceUrl: "../../.."
+assembly: "YukkuriMovieMaker.Plugin.dll"
+summary: "エフェクトの検索キーワードを取得または設定します。"
+
+code: |
+  public string[] Keywords { get; }
+
+propertyType: "[String](https://learn.microsoft.com/ja-jp/dotnet/api/system.string)[]"
+propertyValue: "エフェクトの検索キーワードの配列。"

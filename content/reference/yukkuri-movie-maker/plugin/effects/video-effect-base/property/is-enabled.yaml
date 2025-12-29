@@ -1,0 +1,13 @@
+type: property
+title: "IsEnabled プロパティー"
+description: "エフェクトの有効/無効状態"
+namespace: "YukkuriMovieMaker.Plugin.Effects"
+namespaceUrl: "../../.."
+assembly: "YukkuriMovieMaker.Plugin.dll"
+summary: "エフェクトの有効または無効を取得または設定します。"
+
+code: |
+  public bool IsEnabled { get; set; }
+
+propertyType: "[Boolean](https://learn.microsoft.com/ja-jp/dotnet/api/system.boolean)"
+propertyValue: "エフェクトの有効または無効の状態。"

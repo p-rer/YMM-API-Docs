@@ -1,0 +1,13 @@
+type: property
+title: "Categories プロパティー"
+description: "エフェクトのカテゴリー"
+namespace: "YukkuriMovieMaker.Plugin.Effects"
+namespaceUrl: "../../.."
+assembly: "YukkuriMovieMaker.Plugin.dll"
+summary: "エフェクトのカテゴリーを取得または設定します。"
+
+code: |
+  public string Categories { get; set; }
+
+propertyType: "[String](https://learn.microsoft.com/ja-jp/dotnet/api/system.string)"
+propertyValue: "カテゴリー。"

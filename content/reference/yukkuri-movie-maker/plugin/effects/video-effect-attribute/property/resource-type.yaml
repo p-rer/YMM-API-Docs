@@ -1,0 +1,13 @@
+type: property
+title: "ResourceType プロパティー"
+description: "エフェクトのリソース型"
+namespace: "YukkuriMovieMaker.Plugin.Effects"
+namespaceUrl: "../../.."
+assembly: "YukkuriMovieMaker.Plugin.dll"
+summary: "エフェクトの各種プロパティーに適用するリソースの型を取得または設定します。"
+
+code: |
+  public Type? ResourceType { get; set; }
+
+propertyType: "[Type](https://learn.microsoft.com/ja-jp/dotnet/api/system.type)?"
+propertyValue: "リソース型。"

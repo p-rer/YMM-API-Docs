@@ -92,6 +92,8 @@ interface PropertyDocument extends BaseInfo {
     type: "property"
     code: string
     propertyType: string
+    propertyValue?: string
+    attributes?: string[]
     remarks?: string
     example?: string
 }
@@ -103,6 +105,7 @@ interface FieldDocument extends BaseInfo {
     type: "field"
     code: string
     fieldType: string
+    fieldValue?: string
     remarks?: string
     example?: string
 }
@@ -343,9 +346,21 @@ function generatePropertyMarkdown(data: PropertyDocument): string {
     markdown += data.code
     markdown += "\n```\n\n"
 
-    // 型
-    markdown += `#### 型\n\n`
+    // プロパティ値
+    markdown += `#### プロパティー値\n\n`
     markdown += `${data.propertyType}\n\n`
+
+    if (data.propertyValue) {
+        markdown += `${data.propertyValue}\n\n`
+    }
+
+    // 属性
+    if (data.attributes && data.attributes.length > 0) {
+        markdown += `<br/>\n\n`
+        for (const attr of data.attributes) {
+            markdown += `属性 ${attr}\n\n`
+        }
+    }
 
     // 例
     if (data.example) {
@@ -374,6 +389,10 @@ function generateFieldMarkdown(data: FieldDocument): string {
     // 型
     markdown += `#### 型\n\n`
     markdown += `${data.fieldType}\n\n`
+
+    if (data.fieldValue) {
+        markdown += `${data.fieldValue}\n\n`
+    }
 
     // 例
     if (data.example) {

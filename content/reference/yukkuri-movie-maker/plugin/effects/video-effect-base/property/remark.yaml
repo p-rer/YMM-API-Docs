@@ -1,0 +1,13 @@
+type: property
+title: "Remark プロパティー"
+description: "エフェクトの備考"
+namespace: "YukkuriMovieMaker.Plugin.Effects"
+namespaceUrl: "../../.."
+assembly: "YukkuriMovieMaker.Plugin.dll"
+summary: "エフェクトについて備考を取得または設定します。"
+
+code: |
+  public string Remark { get; set; }
+
+propertyType: "[String](https://learn.microsoft.com/ja-jp/dotnet/api/system.string)"
+propertyValue: "備考。"

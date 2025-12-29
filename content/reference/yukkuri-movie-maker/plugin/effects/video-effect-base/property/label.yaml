@@ -1,0 +1,16 @@
+type: property
+title: "Label プロパティー"
+description: "エフェクトの名前"
+namespace: "YukkuriMovieMaker.Plugin.Effects"
+namespaceUrl: "../../.."
+assembly: "YukkuriMovieMaker.Plugin.dll"
+summary: "エフェクトの名前を設定します。読み取り専用です。"
+
+code: |
+  [Newtonsoft.Json.JsonIgnore]
+  public abstract string Label { get; }
+
+propertyType: "[String](https://learn.microsoft.com/ja-jp/dotnet/api/system.string)"
+propertyValue: "エフェクトの名前。"
+attributes:
+  - JsonIgnore

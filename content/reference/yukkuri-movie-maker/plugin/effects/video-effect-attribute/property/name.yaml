@@ -1,0 +1,13 @@
+type: property
+title: "Name プロパティー"
+description: "エフェクトの名前"
+namespace: "YukkuriMovieMaker.Plugin.Effects"
+namespaceUrl: "../../.."
+assembly: "YukkuriMovieMaker.Plugin.dll"
+summary: "エフェクトの名前を取得または設定します。"
+
+code: |
+  public string Name { get; set; }
+
+propertyType: "[String](https://learn.microsoft.com/ja-jp/dotnet/api/system.string)"
+propertyValue: "名前。"

@@ -8,7 +8,7 @@
 
 <br/>
 
-[VideoEffect](.)属性を初期化します。
+[VideoEffect 属性](..)を初期化します。
 
 ```csharp
 VideoEffectAttribute(string name, string[] categories, string[] keywords, bool isEffectItemSupported = true, bool isAviUtlSupported = true)

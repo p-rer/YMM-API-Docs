@@ -1,0 +1,31 @@
+type: class
+title: "VideoEffectCategories クラス"
+description: "映像エフェクトのカテゴリーキーを定義するクラス"
+namespace: "YukkuriMovieMaker.Plugin.Effects"
+assembly: "YukkuriMovieMaker.Plugin.dll"
+summary: "映像エフェクトのカテゴリーのキーの名前を返すフィールドを持ちます。"
+
+code: |
+  public class VideoEffectCategories
+
+inheritance:
+  - Object
+  - VideoEffectCategories
+
+fields:
+  - name: "[Animation](field/animation)"
+    description: "アニメーションカテゴリーのキーの名前"
+  - name: "[Camera](field/camera)"
+    description: "カメラカテゴリーのキーの名前"
+  - name: "[Filtering](field/filtering)"
+    description: "加工カテゴリーのキーの名前"
+  - name: "[Composition](field/composition)"
+    description: "合成カテゴリーのキーの名前"
+  - name: "[Decoration](field/decoration)"
+    description: "装飾カテゴリーのキーの名前"
+  - name: "[Transition](field/transition)"
+    description: "登場退場カテゴリーのキーの名前"
+  - name: "[Layout](field/layout)"
+    description: "配置カテゴリーのキーの名前"
+  - name: "[Drawing](field/drawing)"
+    description: "描画カテゴリーのキーの名前"

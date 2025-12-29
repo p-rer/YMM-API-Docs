@@ -1,0 +1,13 @@
+type: property
+title: "IsEffectItemSupported プロパティー"
+description: "このエフェクトがエフェクトアイテムに対応しているか"
+namespace: "YukkuriMovieMaker.Plugin.Effects"
+namespaceUrl: "../../.."
+assembly: "YukkuriMovieMaker.Plugin.dll"
+summary: "このエフェクトがエフェクトアイテムに対応しているかを取得または設定します。"
+
+code: |
+  public bool IsEffectItemSupported { get; set; }
+
+propertyType: "[Boolean](https://learn.microsoft.com/ja-jp/dotnet/api/system.boolean)"
+propertyValue: "エフェクトアイテムへの対応または非対応。"
