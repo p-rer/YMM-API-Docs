@@ -110,7 +110,7 @@
     @apply bg-background text-foreground;
   }
   table{
-    @apply overflow-x-scroll w-full block;
+    @apply overflow-x-auto w-full block;
   }
   td {
     @apply min-w-2xs

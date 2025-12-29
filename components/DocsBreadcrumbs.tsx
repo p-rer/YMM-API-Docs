@@ -13,22 +13,21 @@ export function DocsBreadcrumbs({ breadcrumbs }: { breadcrumbs: { label: string;
   const [showEllipsisMenu, setShowEllipsisMenu] = useState(false)
   const [ellipsisItems, setEllipsisItems] = useState<{ label: string, href: string | null }[]>([])
   const [keepCount, setKeepCount] = useState(0)
-  const navRef = useRef<HTMLDivElement>(null)
-  const ellipsisBtnRef = useRef<HTMLButtonElement>(null)
-  const measureRef = useRef<HTMLDivElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const measureNavRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     function updateHiddenType() {
-      if (!navRef.current || !measureRef.current || breadcrumbs.length <= 4) {
+      if (!containerRef.current || !measureNavRef.current || breadcrumbs.length <= 4) {
         setHiddenType(null)
         setEllipsisItems([])
         setKeepCount(0)
         return
       }
 
-      const containerWidth = measureRef.current.getBoundingClientRect().width
+      const containerWidth = containerRef.current.getBoundingClientRect().width
 
-      const children = Array.from(navRef.current.children) as HTMLElement[]
+      const children = Array.from(measureNavRef.current.children) as HTMLElement[]
       const itemWidths = children.map(child => {
         const rect = child.getBoundingClientRect()
         const style = window.getComputedStyle(child)
@@ -37,7 +36,7 @@ export function DocsBreadcrumbs({ breadcrumbs }: { breadcrumbs: { label: string;
         return rect.width + marginLeft + marginRight
       })
 
-      const totalWidth = itemWidths.reduce((a, b) => a + b, 0)
+      const totalWidth = itemWidths.reduce((a, b) => a + b, 0) + 8
 
       if (totalWidth <= containerWidth) {
         setHiddenType(null)
@@ -91,7 +90,7 @@ export function DocsBreadcrumbs({ breadcrumbs }: { breadcrumbs: { label: string;
 
   useEffect(() => {
     if (!showEllipsisMenu) return
-    function closeMenu(e: MouseEvent) {
+    function closeMenu() {
       setShowEllipsisMenu(false)
     }
     window.addEventListener("click", closeMenu)
@@ -118,9 +117,31 @@ export function DocsBreadcrumbs({ breadcrumbs }: { breadcrumbs: { label: string;
   const displayBreadcrumbs = getDisplayBreadcrumbs()
 
   return (
-      <div ref={measureRef} className={"w-full mb-4 overflow-x-auto"}>
+      <div ref={containerRef} className={"w-full mb-4 overflow-x-auto"}>
         <nav
-            ref={navRef}
+            ref={measureNavRef}
+            className="flex items-center space-x-1 text-sm text-muted-foreground absolute invisible pointer-events-none"
+            style={{ paddingLeft: 8, paddingRight: 8, left: -9999 }}
+            aria-hidden="true"
+        >
+          <Link href="/" className="hover:text-foreground whitespace-nowrap" tabIndex={-1}>
+            Home
+          </Link>
+          {breadcrumbs.map((crumb, index) => (
+              <div key={crumb.label + crumb.href + index} className="flex items-center">
+                <ChevronRight className="h-4 w-4" />
+                {crumb.href == null ? (
+                    <span className="whitespace-nowrap">{crumb.label}</span>
+                ) : (
+                    <Link href={crumb.href} className="hover:text-foreground whitespace-nowrap" tabIndex={-1}>
+                      {crumb.label}
+                    </Link>
+                )}
+              </div>
+          ))}
+        </nav>
+
+        <nav
             className="flex items-center space-x-1 text-sm text-muted-foreground relative"
             style={{ paddingLeft: 8, paddingRight: 8 }}
         >
@@ -133,7 +154,6 @@ export function DocsBreadcrumbs({ breadcrumbs }: { breadcrumbs: { label: string;
                 {isEllipsisCrumb(crumb) ? (
                     <>
                       <button
-                          ref={ellipsisBtnRef}
                           type="button"
                           className="px-2 flex items-center hover:bg-muted rounded text-foreground whitespace-nowrap"
                           onClick={handleEllipsisClick}

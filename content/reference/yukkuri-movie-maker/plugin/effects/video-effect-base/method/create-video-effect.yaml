@@ -1,0 +1,25 @@
+title: "CreateVideoEffect メソッド"
+description: "映像エフェクトプロセッサーを生成するメソッド"
+
+namespace: "YukkuriMovieMaker.Plugin.Effects"
+namespaceUrl: "../../.."
+assembly: "YukkuriMovieMaker.Plugin.dll"
+
+summary: "入力画像に対し効果を適用し出力する機能を持つ映像エフェクトオブジェクトを生成します。"
+
+type: |
+  public abstract IVideoEffectProcessor CreateVideoEffect(IGraphicsDevicesAndContext devices);
+
+sections:
+  - heading: "パラメーター"
+    level: 4
+    parameters:
+      - name: "devices"
+        type: "IGraphicsDevicesAndContext"
+        description: "デバイス。デバイスコンテキストを含む。"
+
+  - heading: "戻り値"
+    level: 4
+    returns:
+      type: "IVideoEffectProcessor"
+      description: "生成された映像エフェクト。"

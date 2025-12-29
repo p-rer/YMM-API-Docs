@@ -141,9 +141,9 @@ export async function getDocBySlug(slug: string, isHome = false) {
   // Check for both formats (with spaces and with hyphens) and both file types (md, yaml, yml)
   const possiblePaths = [
     path.join(DOCS_DIRECTORY, `${filePathWithSpaces}.md`),
-    path.join(DOCS_DIRECTORY, filePathWithSpaces, "index.yaml"),
+    path.join(DOCS_DIRECTORY, filePathWithSpaces, "index.md"),
     path.join(DOCS_DIRECTORY, `${filePath}.md`),
-    path.join(DOCS_DIRECTORY, filePath, "index.yaml"),
+    path.join(DOCS_DIRECTORY, filePath, "index.md"),
 
     path.join(DOCS_DIRECTORY, `${filePathWithSpaces}.yaml`),
     path.join(DOCS_DIRECTORY, filePathWithSpaces, "index.yaml"),
@@ -285,9 +285,9 @@ export async function getDocBySlug(slug: string, isHome = false) {
         const filePathWithSpaces = filePathParts.join("/")
         const possiblePaths = [
           path.join(DOCS_DIRECTORY, `${filePathWithSpaces}.md`),
-          path.join(DOCS_DIRECTORY, filePathWithSpaces, "index.yaml"),
+          path.join(DOCS_DIRECTORY, filePathWithSpaces, "index.md"),
           path.join(DOCS_DIRECTORY, `${href}.md`),
-          path.join(DOCS_DIRECTORY, href, "index.yaml"),
+          path.join(DOCS_DIRECTORY, href, "index.md"),
 
           path.join(DOCS_DIRECTORY, `${filePathWithSpaces}.yaml`),
           path.join(DOCS_DIRECTORY, filePathWithSpaces, "index.yaml"),
