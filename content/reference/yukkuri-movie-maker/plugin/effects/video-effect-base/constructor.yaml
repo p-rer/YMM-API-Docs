@@ -1,0 +1,11 @@
+title: "コンストラクター"
+description: "VideoEffectBase クラスのコンストラクター"
+
+namespace: "YukkuriMovieMaker.Plugin.Effects"
+namespaceUrl: "../.."
+assembly: "YukkuriMovieMaker.Plugin.dll"
+
+summary: "[VideoEffectBase](.) クラスの新しいインスタンスを初期化します。"
+
+type: |
+  public VideoEffectBase()

@@ -1,0 +1,58 @@
+title: "VideoEffectBase クラス"
+description: "映像エフェクトの基底クラス"
+
+namespace: "YukkuriMovieMaker.Plugin.Effects"
+assembly: "YukkuriMovieMaker.Plugin.dll"
+
+summary: "映像エフェクトの名前、パラメータの保持、変更の通知、プロセッサーの提供などを行うクラスはこれを継承します。"
+
+type: |
+  public abstract class VideoEffectBase : YukkuriMovieMaker.Commons.Animatable, YukkuriMovieMaker.Plugin.Effects.IVideoEffect, System.ComponentModel.INotifyPropertyChanged, System.ComponentModel.INotifyDataErrorInfo, YukkuriMovieMaker.UndoRedo.IUndoRedoable, YukkuriMovieMaker.ItemEditor.IEditable, YukkuriMovieMaker.Commons.IAnimatable, YukkuriMovieMaker.Project.IFileItem, YukkuriMovieMaker.Project.IResourceItem
+
+inheritance:
+  - "Object"
+  - "Bindable"
+  - "ValidatableBindable"
+  - "UndoRedoable"
+  - "Animatable"
+  - "VideoEffectBase"
+
+implements:
+  - "IVideoEffect"
+  - "INotifyPropertyChanged"
+  - "INotifyDataErrorInfo"
+  - "IUndoRedoable"
+  - "IEditable"
+  - "Animatable"
+  - "IFileItem"
+  - "IResourceItem"
+
+constructors:
+  - name: "[VideoEffectBase()](./constructor)"
+    description: "新しいインスタンスを初期化します。"
+
+properties:
+  - name: "[Label](./property/label)"
+    description: "エフェクトの名前を設定します。読み取り専用です。"
+  - name: "[IsEnabled](./property/is-enabled)"
+    description: "エフェクトの有効または無効を取得または設定します。"
+  - name: "[Remark](./property/remark)"
+    description: "エフェクトについて備考を取得または設定します。"
+
+methods:
+  - name: "[Set<T\\>(ref T, T, string, params string[])](./method/set#settref-t-t-string-params-string)"
+    description: "参照渡しされたストレージに値を設定し、変更を通知します。"
+  - name: "[Set<T\\>(Expression<Func<T\\>\\>, T, string, params string[])](./method/set#settexpressionfunct-t-string-params-string)"
+    description: "プロパティセレクターを使用してプロパティーに値を設定し、変更を通知します。"
+  - name: "[CreateExoVideoFilters(int, ExoOutputDescription)](./method/create-exo-video-filters)"
+    description: "Exoとして出力する際に使用する文字列を生成します。"
+  - name: "[CreateVideoEffect(IGraphicsDevicesAndContext)](./method/create-video-effect)"
+    description: "プロセッサーのインスタンスを生成します。"
+
+interfaces:
+  - name: "IFileItem.GetFiles()"
+    description: "空の文字列配列を返します。"
+  - name: "IFileItem.ReplaceFile(string, string)"
+    description: "何も実行されません。"
+  - name: "IResourceItem.GetResources()"
+    description: "TimelineResource オブジェクトのシーケンスを生成し返します。"

@@ -4,6 +4,7 @@ import { Inter } from "next/font/google"
 import { ThemeProvider } from "@/components/theme-provider"
 import { SITE_DESCRIPTION, SITE_TITLE } from "@/lib/siteSetting"
 import {Metadata} from "next";
+import NextTopLoader from "nextjs-toploader";
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -26,6 +27,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={"overflow-y-scroll overflow-x-hidden"} suppressHydrationWarning>
     <body className={inter.className}>
+    <NextTopLoader color={"#0a0a0a"} />
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
       {children}
     </ThemeProvider>

@@ -18,6 +18,7 @@ import { Link } from 'mdast';
 import remarkWrapHeadings from "./remarkWrapHeadings"
 import remarkRemoveFirstH1 from "./remarkRemoveFirstH1"
 import { GITHUB_REPO_BRANCH, GITHUB_REPO_NAME, GITHUB_REPO_USERNAME, IS_GITHUB_REPO_EDITABLE } from "./siteSetting"
+import { yamlToMarkdown } from "./yaml-docs"
 
 const DOCS_DIRECTORY = path.join(process.cwd(), "content")
 
@@ -84,26 +85,26 @@ const remarkLinkModifier: Plugin = () => {
 
 export default remarkLinkModifier;
 
-// Get all doc paths
+// Get all doc paths (including YAML files)
 export function getAllDocPaths() {
   return getAllFiles(DOCS_DIRECTORY)
-    .map((file) => {
-      const relativePath = path.relative(DOCS_DIRECTORY, file)
-      // Normalize path separators to forward slashes for URL consistency
-      const normalizedPath = relativePath.split(path.sep).join("/")
-      const filePathWithoutExt = normalizedPath.replace(/\.md$/, "")
+      .map((file) => {
+        const relativePath = path.relative(DOCS_DIRECTORY, file)
+        // Normalize path separators to forward slashes for URL consistency
+        const normalizedPath = relativePath.split(path.sep).join("/")
+        const filePathWithoutExt = normalizedPath.replace(/\.(md|yaml|yml)$/, "")
 
-      // Handle index.md files
-      if (path.basename(filePathWithoutExt) === "index") {
-        return path.dirname(filePathWithoutExt).split(path.sep).join("/")
-      }
+        // Handle index files
+        if (path.basename(filePathWithoutExt) === "index") {
+          return path.dirname(filePathWithoutExt).split(path.sep).join("/")
+        }
 
-      return filePathWithoutExt
-    })
-    .map(normalizePathForUrl)
+        return filePathWithoutExt
+      })
+      .map(normalizePathForUrl)
 }
 
-// Get all files recursively
+// Get all files recursively (including YAML files)
 function getAllFiles(dir: string): string[] {
   const files: string[] = []
 
@@ -113,7 +114,7 @@ function getAllFiles(dir: string): string[] {
 
     if (stat.isDirectory()) {
       files.push(...getAllFiles(filePath))
-    } else if (file.endsWith(".md")) {
+    } else if (file.endsWith(".md") || file.endsWith(".yaml") || file.endsWith(".yml")) {
       files.push(filePath)
     }
   })
@@ -121,7 +122,7 @@ function getAllFiles(dir: string): string[] {
   return files
 }
 
-// Get doc content by slug
+// Get doc content by slug (with YAML support)
 export async function getDocBySlug(slug: string, isHome = false) {
   // Convert slug to file path
   let filePath = slug
@@ -137,12 +138,22 @@ export async function getDocBySlug(slug: string, isHome = false) {
   const filePathParts = filePath.split("/").map((part) => part.replace(/-/g, " "))
   const filePathWithSpaces = filePathParts.join("/")
 
-  // Check for both formats (with spaces and with hyphens)
+  // Check for both formats (with spaces and with hyphens) and both file types (md, yaml, yml)
   const possiblePaths = [
     path.join(DOCS_DIRECTORY, `${filePathWithSpaces}.md`),
-    path.join(DOCS_DIRECTORY, filePathWithSpaces, "index.md"),
+    path.join(DOCS_DIRECTORY, filePathWithSpaces, "index.yaml"),
     path.join(DOCS_DIRECTORY, `${filePath}.md`),
-    path.join(DOCS_DIRECTORY, filePath, "index.md"),
+    path.join(DOCS_DIRECTORY, filePath, "index.yaml"),
+
+    path.join(DOCS_DIRECTORY, `${filePathWithSpaces}.yaml`),
+    path.join(DOCS_DIRECTORY, filePathWithSpaces, "index.yaml"),
+    path.join(DOCS_DIRECTORY, `${filePath}.yaml`),
+    path.join(DOCS_DIRECTORY, filePath, "index.yaml"),
+
+    path.join(DOCS_DIRECTORY, `${filePathWithSpaces}.yml`),
+    path.join(DOCS_DIRECTORY, filePathWithSpaces, "index.yml"),
+    path.join(DOCS_DIRECTORY, `${filePath}.yml`),
+    path.join(DOCS_DIRECTORY, filePath, "index.yml"),
   ]
 
   let fullPath = ""
@@ -159,7 +170,10 @@ export async function getDocBySlug(slug: string, isHome = false) {
   }
 
   try {
-    const fileContents = fs.readFileSync(fullPath, "utf8")
+    const isYAML = fullPath.endsWith(".yaml") || fullPath.endsWith(".yml")
+    const fileContents = isYAML
+        ? yamlToMarkdown(fs.readFileSync(fullPath, "utf8"))
+        : fs.readFileSync(fullPath, "utf8")
     const { data, content } = matter(fileContents)
 
     // Process markdown content
@@ -215,7 +229,7 @@ export async function getDocBySlug(slug: string, isHome = false) {
         title = h1Match[1]
       } else {
         // Use filename as fallback
-        const filename = path.basename(fullPath, ".md")
+        const filename = path.basename(fullPath, path.extname(fullPath))
         title = filename === "index" ? path.basename(path.dirname(fullPath)) : filename
 
         // Clean up and capitalize filename
@@ -253,9 +267,9 @@ export async function getDocBySlug(slug: string, isHome = false) {
 
     // Get relative path for breadcrumbs
     const relativePath = path.relative(DOCS_DIRECTORY, fullPath)
-    const pathParts = relativePath.replace(/\.md$/, "").split(path.sep)
+    const pathParts = relativePath.replace(/\.(md|yaml|yml)$/, "").split(path.sep)
 
-    // Handle index.md files for breadcrumbs
+    // Handle index files for breadcrumbs
     if (pathParts[pathParts.length - 1] === "index") {
       pathParts.pop()
     }
@@ -271,9 +285,19 @@ export async function getDocBySlug(slug: string, isHome = false) {
         const filePathWithSpaces = filePathParts.join("/")
         const possiblePaths = [
           path.join(DOCS_DIRECTORY, `${filePathWithSpaces}.md`),
-          path.join(DOCS_DIRECTORY, filePathWithSpaces, "index.md"),
+          path.join(DOCS_DIRECTORY, filePathWithSpaces, "index.yaml"),
           path.join(DOCS_DIRECTORY, `${href}.md`),
-          path.join(DOCS_DIRECTORY, href, "index.md"),
+          path.join(DOCS_DIRECTORY, href, "index.yaml"),
+
+          path.join(DOCS_DIRECTORY, `${filePathWithSpaces}.yaml`),
+          path.join(DOCS_DIRECTORY, filePathWithSpaces, "index.yaml"),
+          path.join(DOCS_DIRECTORY, `${href}.yaml`),
+          path.join(DOCS_DIRECTORY, href, "index.yaml"),
+
+          path.join(DOCS_DIRECTORY, `${filePathWithSpaces}.yml`),
+          path.join(DOCS_DIRECTORY, filePathWithSpaces, "index.yml"),
+          path.join(DOCS_DIRECTORY, `${href}.yml`),
+          path.join(DOCS_DIRECTORY, href, "index.yml"),
         ]
         let fullPath = ""
         for (const p of possiblePaths) {
@@ -308,7 +332,7 @@ export async function getDocBySlug(slug: string, isHome = false) {
   }
 }
 
-// Get document tree for navigation
+// Get document tree for navigation (including YAML files)
 export async function getDocTree() {
   const files = getAllFiles(DOCS_DIRECTORY)
   const tree: any = { children: {} }
@@ -318,11 +342,14 @@ export async function getDocTree() {
     const pathParts = relativePath.split(path.sep)
     const fileName = pathParts.pop() || ""
 
-    // Skip non-markdown files and home
-    if (!fileName.endsWith(".md") || fileName === ".md") continue
+    // Skip non-document files
+    if (!fileName.endsWith(".md") && !fileName.endsWith(".yaml") && !fileName.endsWith(".yml")) continue
+    if (fileName === ".md" || fileName === ".yaml" || fileName === ".yml") continue
 
-    // Read frontmatter for title
-    const fileContents = fs.readFileSync(file, "utf8")
+    const isYAML = file.endsWith(".yaml") || file.endsWith(".yml")
+    const fileContents = isYAML
+        ? yamlToMarkdown(fs.readFileSync(file, "utf8"))
+        : fs.readFileSync(file, "utf8")
     const { data, content } = matter(fileContents)
 
     // Determine title
@@ -332,7 +359,7 @@ export async function getDocTree() {
       if (h1Match) {
         title = h1Match[1]
       } else {
-        title = path.basename(fileName, ".md").replace(/-/g, " ")
+        title = path.basename(fileName, path.extname(fileName)).replace(/-/g, " ")
         title = title
           .split(" ")
           .map((word :string) => word.charAt(0).toUpperCase() + word.slice(1))
@@ -340,11 +367,11 @@ export async function getDocTree() {
       }
     }
 
-    // Handle index.md files
-    const isIndex = fileName === "index.md"
+    // Handle index files
+    const isIndex = path.basename(fileName, path.extname(fileName)) === "index"
     const urlPath = isIndex
       ? pathParts.map(normalizePathForUrl).join("/")
-      : [...pathParts, path.basename(fileName, ".md")].map(normalizePathForUrl).join("/")
+      : [...pathParts, path.basename(fileName, path.extname(fileName))].map(normalizePathForUrl).join("/")
 
     // Build tree structure
     let current = tree
@@ -365,7 +392,7 @@ export async function getDocTree() {
       current.isIndex = true
       current.url = "/" + urlPath
     } else {
-      const fileNameWithoutExt = path.basename(fileName, ".md")
+      const fileNameWithoutExt = path.basename(fileName, path.extname(fileName))
       current.children[fileNameWithoutExt] = {
         name: fileNameWithoutExt,
         title,
@@ -429,6 +456,3 @@ export async function getNextAndPrevDocs(slug: string) {
 
   return result
 }
-
-// Make sure this line is at the top of the exports
-
