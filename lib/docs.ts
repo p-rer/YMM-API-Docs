@@ -174,6 +174,7 @@ export async function getDocBySlug(slug: string, isHome = false) {
     const fileContents = isYAML
         ? yamlToMarkdown(fs.readFileSync(fullPath, "utf8"))
         : fs.readFileSync(fullPath, "utf8")
+    if (!fileContents) return null
     const { data, content } = matter(fileContents)
 
     // Process markdown content
@@ -350,6 +351,7 @@ export async function getDocTree() {
     const fileContents = isYAML
         ? yamlToMarkdown(fs.readFileSync(file, "utf8"))
         : fs.readFileSync(file, "utf8")
+    if (!fileContents) return null
     const { data, content } = matter(fileContents)
 
     // Determine title

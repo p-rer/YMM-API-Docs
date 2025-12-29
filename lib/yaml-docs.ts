@@ -1,355 +1,447 @@
-import fs from "fs"
 import yaml from "js-yaml"
 
 /**
- * パラメーター/プロパティーの詳細定義
+ * ドキュメントタイプの列挙
  */
-interface ParameterDetail {
-    name: string
-    type: string
-    description: string
-    attributes?: string[]
-}
+type DocumentType =
+    | "class"
+    | "constructor"
+    | "method"
+    | "property"
+    | "field"
+    | "interface"
+    | "enum"
+    | "delegate"
 
 /**
- * オーバーロード定義
+ * 基本情報（全タイプ共通）
  */
-interface OverloadDefinition {
-    name: string
-    description: string
-    signature?: string
-    typeParameters?: Array<{
-        name: string
-        description: string
-    }>
-    parameters?: ParameterDetail[]
-    returns?: {
-        type: string
-        description: string
-    }
-}
-
-/**
- * YAML構造の型定義
- */
-interface YAMLDocument {
-    title?: string
+interface BaseInfo {
+    type: DocumentType
+    title: string
     description?: string
-    namespace?: string
-    namespaceUrl?: string  // 名前空間へのリンクURL
-    assembly?: string
-    type?: string
-    summary?: string
+    namespace: string
+    namespaceUrl?: string
+    assembly: string
+    summary: string
+}
 
-    // 基本的なリスト形式
-    constructors?: Array<{
-        name: string
-        description: string
-        signature?: string
-    }>
-    properties?: Array<{
-        name: string
-        description: string
-    }>
-    methods?: Array<{
-        name: string
-        description: string
-    }>
-    interfaces?: Array<{
-        name: string
-        description: string
-    }>
-
-    // 継承・実装
+/**
+ * クラスドキュメント
+ */
+interface ClassDocument extends BaseInfo {
+    type: "class"
+    code: string
     inheritance?: string[]
     implements?: string[]
+    constructors?: Array<{ name: string; description: string }>
+    properties?: Array<{ name: string; description: string }>
+    fields?: Array<{ name: string; description: string }>
+    methods?: Array<{ name: string; description: string }>
+    interfaces?: Array<{ name: string; description: string }>
+}
 
-    // オーバーロード対応
-    overloads?: Array<OverloadDefinition>
-
-    // カスタムセクション
-    sections?: Array<{
-        heading: string
-        level: number
-        id?: string  // アンカーリンク用ID
-        content?: string
-        table?: {
-            headers: string[]
-            rows: Array<string[]>
-        }
-        code?: {
-            language: string
-            content: string
-        }
-        list?: Array<{
-            title?: string
-            items: string[]
-        }>
-        parameters?: ParameterDetail[]  // パラメーター詳細リスト
-        typeParameters?: Array<{  // 型パラメーター
+/**
+ * コンストラクタードキュメント
+ */
+interface ConstructorDocument extends BaseInfo {
+    type: "constructor"
+    overloads?: Array<{
+        code: string
+        typeParameters?: Array<{ name: string; description: string }>
+        parameters?: Array<{
             name: string
+            type: string
             description: string
+            attributes?: string[]
         }>
-        returns?: {  // 戻り値
+        remarks?: string
+        example?: string
+    }>
+}
+
+/**
+ * メソッドドキュメント
+ */
+interface MethodDocument extends BaseInfo {
+    type: "method"
+    overloads: Array<{
+        name: string
+        description: string
+        code: string
+        typeParameters?: Array<{ name: string; description: string }>
+        parameters?: Array<{
+            name: string
+            type: string
+            description: string
+            attributes?: string[]
+        }>
+        returns?: {
             type: string
             description: string
         }
+        remarks?: string
+        example?: string
     }>
 }
+
+/**
+ * プロパティドキュメント
+ */
+interface PropertyDocument extends BaseInfo {
+    type: "property"
+    code: string
+    propertyType: string
+    remarks?: string
+    example?: string
+}
+
+/**
+ * フィールドドキュメント
+ */
+interface FieldDocument extends BaseInfo {
+    type: "field"
+    code: string
+    fieldType: string
+    remarks?: string
+    example?: string
+}
+
+/**
+ * 統合ドキュメント型
+ */
+type YAMLDocument =
+    | ClassDocument
+    | ConstructorDocument
+    | MethodDocument
+    | PropertyDocument
+    | FieldDocument
 
 /**
  * YAMLからMarkdownを生成
  */
-export function yamlToMarkdown(yamlContent: string): string {
+export function yamlToMarkdown(yamlContent: string): string | undefined {
     try {
         const data = yaml.load(yamlContent) as YAMLDocument
-        let markdown = ""
 
-        // タイトル
-        if (data.title) {
-            markdown += `# ${data.title}\n\n`
+        // ドキュメントタイプによって処理を分岐
+        switch (data.type) {
+            case "class":
+                return generateClassMarkdown(data as ClassDocument)
+            case "constructor":
+                return generateConstructorMarkdown(data as ConstructorDocument)
+            case "method":
+                return generateMethodMarkdown(data as MethodDocument)
+            case "property":
+                return generatePropertyMarkdown(data as PropertyDocument)
+            case "field":
+                return generateFieldMarkdown(data as FieldDocument)
+            default:
+                throw new Error(`Unknown document type: ${(data as any).type}`)
         }
-
-        // 定義セクション
-        if (data.namespace || data.assembly) {
-            markdown += `## 定義\n\n`
-            if (data.namespace) {
-                const namespaceUrl = data.namespaceUrl || ".."
-                markdown += `名前空間: [${data.namespace}](${namespaceUrl})\n\n`
-            }
-            if (data.assembly) {
-                markdown += `アセンブリ: ${data.assembly}\n\n`
-            }
-            markdown += `<br/>\n\n`
-        }
-
-        // サマリー
-        if (data.summary) {
-            markdown += `${data.summary}\n\n`
-        }
-
-        // 型定義コード
-        if (data.type) {
-            markdown += "```csharp\n"
-            markdown += data.type
-            markdown += "\n```\n\n"
-        }
-
-        // 継承情報
-        if (data.inheritance && data.inheritance.length > 0) {
-            markdown += `継承 ${data.inheritance.join(" → ")}\n\n`
-        }
-
-        // 実装情報
-        if (data.implements && data.implements.length > 0) {
-            markdown += `実装 ${data.implements.join(", ")}\n\n`
-        }
-
-        // コンストラクター
-        if (data.constructors && data.constructors.length > 0) {
-            markdown += `## コンストラクター\n\n`
-            markdown += `| 名前 | 説明 |\n`
-            markdown += `| --- | --- |\n`
-            for (const constructor of data.constructors) {
-                markdown += `| ${constructor.name} | ${constructor.description} |\n`
-            }
-            markdown += `\n`
-        }
-
-        // プロパティー
-        if (data.properties && data.properties.length > 0) {
-            markdown += `## プロパティー\n\n`
-            markdown += `| 名前 | 説明 |\n`
-            markdown += `| --- | --- |\n`
-            for (const property of data.properties) {
-                markdown += `| ${property.name} | ${property.description} |\n`
-            }
-            markdown += `\n`
-        }
-
-        // メソッド
-        if (data.methods && data.methods.length > 0) {
-            markdown += `## メソッド\n\n`
-            markdown += `| 名前 | 説明 |\n`
-            markdown += `| --- | --- |\n`
-            for (const method of data.methods) {
-                markdown += `| ${method.name} | ${method.description} |\n`
-            }
-            markdown += `\n`
-        }
-
-        // オーバーロード
-        if (data.overloads && data.overloads.length > 0) {
-            markdown += `## オーバーロード\n\n`
-            markdown += `| 名前 | 説明 |\n`
-            markdown += `| --- | --- |\n`
-            for (const overload of data.overloads) {
-                markdown += `| ${overload.name} | ${overload.description} |\n`
-            }
-            markdown += `\n`
-
-            // 各オーバーロードの詳細
-            for (const overload of data.overloads) {
-
-                // シグネチャ
-                if (overload.signature) {
-                    markdown += "```csharp\n"
-                    markdown += overload.signature
-                    markdown += "\n```\n\n"
-                }
-
-                // 型パラメーター
-                if (overload.typeParameters && overload.typeParameters.length > 0) {
-                    markdown += `#### 型パラメーター\n\n`
-                    for (const typeParam of overload.typeParameters) {
-                        markdown += `\`${typeParam.name}\`\n\n`
-                        markdown += `${typeParam.description}\n\n`
-                    }
-                }
-
-                // パラメーター
-                if (overload.parameters && overload.parameters.length > 0) {
-                    markdown += `#### パラメーター\n\n`
-                    for (const param of overload.parameters) {
-                        markdown += `\`${param.name}\` ${param.type}\n\n`
-                        markdown += `${param.description}\n\n`
-
-                        // 属性情報
-                        if (param.attributes && param.attributes.length > 0) {
-                            for (const attr of param.attributes) {
-                                markdown += `属性 ${attr}\n\n`
-                            }
-                        }
-
-                        markdown += `<br/>\n\n`
-                    }
-                }
-
-                // 戻り値
-                if (overload.returns) {
-                    markdown += `#### 戻り値\n\n`
-                    markdown += `${overload.returns.type}\n\n`
-                    markdown += `${overload.returns.description}\n\n`
-                }
-            }
-        }
-
-        // インターフェイスの実装
-        if (data.interfaces && data.interfaces.length > 0) {
-            markdown += `## 明示的なインターフェイスの実装\n`
-            markdown += `| 名前 | 説明 |\n`
-            markdown += `| --- | --- |\n`
-            for (const iface of data.interfaces) {
-                markdown += `| ${iface.name} | ${iface.description} |\n`
-            }
-            markdown += `\n`
-        }
-
-        // カスタムセクション
-        if (data.sections) {
-            for (const section of data.sections) {
-                // 見出し
-                const headingPrefix = "#".repeat(section.level || 2)
-                markdown += `${headingPrefix} ${section.heading}\n\n`
-
-                // コンテンツ
-                if (section.content) {
-                    markdown += `${section.content}\n\n`
-                }
-
-                // テーブル
-                if (section.table) {
-                    markdown += `| ${section.table.headers.join(" | ")} |\n`
-                    markdown += `| ${section.table.headers.map(() => "---").join(" | ")} |\n`
-                    for (const row of section.table.rows) {
-                        markdown += `| ${row.join(" | ")} |\n`
-                    }
-                    markdown += `\n`
-                }
-
-                // コード
-                if (section.code) {
-                    markdown += `\`\`\`${section.code.language}\n`
-                    markdown += section.code.content
-                    markdown += `\n\`\`\`\n\n`
-                }
-
-                // 型パラメーター
-                if (section.typeParameters && section.typeParameters.length > 0) {
-                    markdown += `#### 型パラメーター\n\n`
-                    for (const typeParam of section.typeParameters) {
-                        markdown += `\`${typeParam.name}\`\n\n`
-                        markdown += `${typeParam.description}\n\n`
-                    }
-                }
-
-                // パラメーター詳細
-                if (section.parameters && section.parameters.length > 0) {
-                    markdown += `#### パラメーター\n\n`
-                    for (const param of section.parameters) {
-                        markdown += `\`${param.name}\` ${param.type}\n\n`
-                        markdown += `${param.description}\n\n`
-
-                        // 属性情報
-                        if (param.attributes && param.attributes.length > 0) {
-                            for (const attr of param.attributes) {
-                                markdown += `属性 ${attr}\n\n`
-                            }
-                        }
-
-                        markdown += `<br/>\n\n`
-                    }
-                }
-
-                // リスト
-                if (section.list) {
-                    for (const listGroup of section.list) {
-                        if (listGroup.title) {
-                            markdown += `**${listGroup.title}**\n\n`
-                        }
-                        for (const item of listGroup.items) {
-                            markdown += `- ${item}\n`
-                        }
-                        markdown += `\n`
-                    }
-                }
-
-                // 戻り値
-                if (section.returns) {
-                    markdown += `#### 戻り値\n\n`
-                    markdown += `${section.returns.type}\n\n`
-                    markdown += `${section.returns.description}\n\n`
-                }
-            }
-        }
-
-        return markdown.trim()
     } catch (error) {
         console.error("Error parsing YAML:", error)
-        throw error
     }
 }
 
 /**
- * YAMLファイルが存在するかチェック
+ * 共通ヘッダー生成
  */
-export function hasYAMLFile(basePath: string): boolean {
-    return fs.existsSync(`${basePath}.yaml`) || fs.existsSync(`${basePath}.yml`)
+function generateCommonHeader(data: BaseInfo): string {
+    let markdown = ""
+
+    // タイトル
+    markdown += `# ${data.title}\n\n`
+
+    // 定義セクション
+    markdown += `## 定義\n\n`
+    const namespaceUrl = data.namespaceUrl || ".."
+    markdown += `名前空間: [${data.namespace}](${namespaceUrl})\n\n`
+    markdown += `アセンブリ: ${data.assembly}\n\n`
+    markdown += `<br/>\n\n`
+
+    // サマリー
+    markdown += `${data.summary}\n\n`
+
+    return markdown
 }
 
 /**
- * YAMLファイルを読み込む
+ * クラスドキュメント生成
  */
-export function readYAMLFile(basePath: string): string | null {
-    const yamlPath = fs.existsSync(`${basePath}.yaml`)
-        ? `${basePath}.yaml`
-        : fs.existsSync(`${basePath}.yml`)
-            ? `${basePath}.yml`
-            : null
+function generateClassMarkdown(data: ClassDocument): string {
+    let markdown = generateCommonHeader(data)
 
-    if (!yamlPath) {
-        return null
+    // クラス定義コード
+    markdown += "```csharp\n"
+    markdown += data.code
+    markdown += "\n```\n\n"
+
+    // 継承情報
+    if (data.inheritance && data.inheritance.length > 0) {
+        markdown += `継承 ${data.inheritance.join(" → ")}\n\n`
     }
 
-    return fs.readFileSync(yamlPath, "utf8")
+    // 実装情報
+    if (data.implements && data.implements.length > 0) {
+        markdown += `実装 ${data.implements.join(", ")}\n\n`
+    }
+
+    // コンストラクター
+    if (data.constructors && data.constructors.length > 0) {
+        markdown += `## コンストラクター\n\n`
+        markdown += generateTable(["名前", "説明"], data.constructors)
+    }
+
+    // プロパティー
+    if (data.properties && data.properties.length > 0) {
+        markdown += `## プロパティー\n\n`
+        markdown += generateTable(["名前", "説明"], data.properties)
+    }
+
+    // フィールド
+    if (data.fields && data.fields.length > 0) {
+        markdown += `## フィールド\n\n`
+        markdown += generateTable(["名前", "説明"], data.fields)
+    }
+
+    // メソッド
+    if (data.methods && data.methods.length > 0) {
+        markdown += `## メソッド\n\n`
+        markdown += generateTable(["名前", "説明"], data.methods)
+    }
+
+    // インターフェイス実装
+    if (data.interfaces && data.interfaces.length > 0) {
+        markdown += `## 明示的なインターフェイスの実装\n`
+        markdown += generateTable(["名前", "説明"], data.interfaces)
+    }
+
+    return markdown.trim()
+}
+
+/**
+ * コンストラクタードキュメント生成
+ */
+function generateConstructorMarkdown(data: ConstructorDocument): string {
+    let markdown = generateCommonHeader(data)
+
+    // オーバーロードがない場合（単一コンストラクター）
+    if (!data.overloads || data.overloads.length === 0) {
+        return markdown.trim()
+    }
+
+    // オーバーロードがある場合
+    if (data.overloads.length > 1) {
+        markdown += `## オーバーロード\n\n`
+        const overloadList = data.overloads.map(o => ({
+            name: extractMethodName(o.code),
+            description: ""
+        }))
+        markdown += generateTable(["名前", "説明"], overloadList)
+    }
+
+    // 各オーバーロードの詳細
+    for (const overload of data.overloads) {
+        if (data.overloads.length > 1) {
+            const methodName = extractMethodName(overload.code)
+            markdown += `## ${methodName}\n\n`
+        }
+
+        // コード
+        markdown += "```csharp\n"
+        markdown += overload.code
+        markdown += "\n```\n\n"
+
+        // 型パラメーター
+        if (overload.typeParameters && overload.typeParameters.length > 0) {
+            markdown += generateTypeParameters(overload.typeParameters)
+        }
+
+        // パラメーター
+        if (overload.parameters && overload.parameters.length > 0) {
+            markdown += generateParameters(overload.parameters)
+        }
+
+        // 例
+        if (overload.example) {
+            markdown += `## 例\n\n${overload.example}\n\n`
+        }
+
+        // 注釈
+        if (overload.remarks) {
+            markdown += `## 注釈\n\n${overload.remarks}\n\n`
+        }
+    }
+
+    return markdown.trim()
+}
+
+/**
+ * メソッドドキュメント生成
+ */
+function generateMethodMarkdown(data: MethodDocument): string {
+    let markdown = generateCommonHeader(data)
+
+    // オーバーロード一覧
+    if (data.overloads.length > 1) {
+        markdown += `## オーバーロード\n\n`
+        markdown += generateTable(["名前", "説明"], data.overloads)
+    }
+
+    // 各オーバーロードの詳細
+    for (const overload of data.overloads) {
+        if (data.overloads.length > 1) {
+            markdown += `## ${overload.name}\n\n`
+            markdown += `${overload.description}\n\n`
+        }
+
+        // コード
+        markdown += "```csharp\n"
+        markdown += overload.code
+        markdown += "\n```\n\n"
+
+        // 型パラメーター
+        if (overload.typeParameters && overload.typeParameters.length > 0) {
+            markdown += generateTypeParameters(overload.typeParameters)
+        }
+
+        // パラメーター
+        if (overload.parameters && overload.parameters.length > 0) {
+            markdown += generateParameters(overload.parameters)
+        }
+
+        // 戻り値
+        if (overload.returns) {
+            markdown += `#### 戻り値\n\n`
+            markdown += `${overload.returns.type}\n\n`
+            markdown += `${overload.returns.description}\n\n`
+        }
+
+        // 例
+        if (overload.example) {
+            markdown += `## 例\n\n${overload.example}\n\n`
+        }
+
+        // 注釈
+        if (overload.remarks) {
+            markdown += `## 注釈\n\n${overload.remarks}\n\n`
+        }
+    }
+
+    return markdown.trim()
+}
+
+/**
+ * プロパティドキュメント生成
+ */
+function generatePropertyMarkdown(data: PropertyDocument): string {
+    let markdown = generateCommonHeader(data)
+
+    // プロパティ定義コード
+    markdown += "```csharp\n"
+    markdown += data.code
+    markdown += "\n```\n\n"
+
+    // 型
+    markdown += `#### 型\n\n`
+    markdown += `${data.propertyType}\n\n`
+
+    // 例
+    if (data.example) {
+        markdown += `## 例\n\n${data.example}\n\n`
+    }
+
+    // 注釈
+    if (data.remarks) {
+        markdown += `## 注釈\n\n${data.remarks}\n\n`
+    }
+
+    return markdown.trim()
+}
+
+/**
+ * フィールドドキュメント生成
+ */
+function generateFieldMarkdown(data: FieldDocument): string {
+    let markdown = generateCommonHeader(data)
+
+    // フィールド定義コード
+    markdown += "```csharp\n"
+    markdown += data.code
+    markdown += "\n```\n\n"
+
+    // 型
+    markdown += `#### 型\n\n`
+    markdown += `${data.fieldType}\n\n`
+
+    // 例
+    if (data.example) {
+        markdown += `## 例\n\n${data.example}\n\n`
+    }
+
+    // 注釈
+    if (data.remarks) {
+        markdown += `## 注釈\n\n${data.remarks}\n\n`
+    }
+
+    return markdown.trim()
+}
+
+/**
+ * テーブル生成ヘルパー
+ */
+function generateTable(headers: string[], items: Array<{ name: string; description: string }>): string {
+    let markdown = `| ${headers.join(" | ")} |\n`
+    markdown += `| ${headers.map(() => "---").join(" | ")} |\n`
+    for (const item of items) {
+        markdown += `| ${item.name} | ${item.description} |\n`
+    }
+    markdown += `\n`
+    return markdown
+}
+
+/**
+ * 型パラメーター生成ヘルパー
+ */
+function generateTypeParameters(typeParams: Array<{ name: string; description: string }>): string {
+    let markdown = `#### 型パラメーター\n\n`
+    for (const typeParam of typeParams) {
+        markdown += `\`${typeParam.name}\`\n\n`
+        markdown += `${typeParam.description}\n\n`
+    }
+    return markdown
+}
+
+/**
+ * パラメーター生成ヘルパー
+ */
+function generateParameters(params: Array<{
+    name: string
+    type: string
+    description: string
+    attributes?: string[]
+}>): string {
+    let markdown = `#### パラメーター\n\n`
+    for (const param of params) {
+        markdown += `\`${param.name}\` ${param.type}\n\n`
+        markdown += `${param.description}\n\n`
+
+        if (param.attributes && param.attributes.length > 0) {
+            for (const attr of param.attributes) {
+                markdown += `属性 ${attr}\n\n`
+            }
+        }
+
+        markdown += `<br/>\n\n`
+    }
+    return markdown
+}
+
+/**
+ * コードからメソッド名を抽出
+ */
+function extractMethodName(code: string): string {
+    const match = code.match(/\s+(\w+(?:<[^>]+>)?)\s*\(/)
+    return match ? match[1] : "Unknown"
 }
