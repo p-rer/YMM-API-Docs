@@ -1,0 +1,13 @@
+type: field
+title: "Composition フィールド"
+description: "合成カテゴリーのキー"
+namespace: "YukkuriMovieMaker.Plugin.Effects"
+namespaceUrl: "../../.."
+assembly: "YukkuriMovieMaker.Plugin.dll"
+summary: "合成カテゴリーのキーの名前を返します。"
+
+code: |
+  public const string Composition = "YMM4Key_EffectCategoryCompositionName";
+
+fieldType: "[String](https://learn.microsoft.com/ja-jp/dotnet/api/system.string)"
+

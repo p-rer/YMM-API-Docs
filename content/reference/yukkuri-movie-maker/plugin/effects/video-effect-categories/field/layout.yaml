@@ -1,0 +1,13 @@
+type: field
+title: "Layout フィールド"
+description: "配置カテゴリーのキー"
+namespace: "YukkuriMovieMaker.Plugin.Effects"
+namespaceUrl: "../../.."
+assembly: "YukkuriMovieMaker.Plugin.dll"
+summary: "配置カテゴリーのキーの名前を返します。"
+
+code: |
+  public const string Layout = "YMM4Key_EffectCategoryLayoutName";
+
+fieldType: "[String](https://learn.microsoft.com/ja-jp/dotnet/api/system.string)"
+

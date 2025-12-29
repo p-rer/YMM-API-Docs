@@ -1,0 +1,13 @@
+type: field
+title: "Drawing フィールド"
+description: "描画カテゴリーのキー"
+namespace: "YukkuriMovieMaker.Plugin.Effects"
+namespaceUrl: "../../.."
+assembly: "YukkuriMovieMaker.Plugin.dll"
+summary: "描画カテゴリーのキーの名前を返します。"
+
+code: |
+  public const string Drawing = "YMM4Key_EffectCategoryDrawingName";
+
+fieldType: "[String](https://learn.microsoft.com/ja-jp/dotnet/api/system.string)"
+

@@ -1,0 +1,12 @@
+type: field
+title: "Camera フィールド"
+description: "カメラカテゴリーのキー"
+namespace: "YukkuriMovieMaker.Plugin.Effects"
+namespaceUrl: "../../.."
+assembly: "YukkuriMovieMaker.Plugin.dll"
+summary: "カメラカテゴリーのキーの名前を返します。"
+
+code: |
+  public const string Camera = "YMM4Key_EffectCategoryCameraName";
+
+fieldType: "[String](https://learn.microsoft.com/ja-jp/dotnet/api/system.string)"

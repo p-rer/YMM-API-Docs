@@ -1,0 +1,13 @@
+type: field
+title: "Transition フィールド"
+description: "登場退場カテゴリーのキー"
+namespace: "YukkuriMovieMaker.Plugin.Effects"
+namespaceUrl: "../../.."
+assembly: "YukkuriMovieMaker.Plugin.dll"
+summary: "登場退場カテゴリーのキーの名前を返します。"
+
+code: |
+  public const string Transition = "YMM4Key_EffectCategoryTransitionName";
+
+fieldType: "[String](https://learn.microsoft.com/ja-jp/dotnet/api/system.string)"
+
