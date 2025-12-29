@@ -1,31 +1,30 @@
+type: class
 title: "VideoEffectBase クラス"
 description: "映像エフェクトの基底クラス"
-
 namespace: "YukkuriMovieMaker.Plugin.Effects"
 assembly: "YukkuriMovieMaker.Plugin.dll"
-
 summary: "映像エフェクトの名前、パラメータの保持、変更の通知、プロセッサーの提供などを行うクラスはこれを継承します。"
 
-type: |
+code: |
   public abstract class VideoEffectBase : YukkuriMovieMaker.Commons.Animatable, YukkuriMovieMaker.Plugin.Effects.IVideoEffect, System.ComponentModel.INotifyPropertyChanged, System.ComponentModel.INotifyDataErrorInfo, YukkuriMovieMaker.UndoRedo.IUndoRedoable, YukkuriMovieMaker.ItemEditor.IEditable, YukkuriMovieMaker.Commons.IAnimatable, YukkuriMovieMaker.Project.IFileItem, YukkuriMovieMaker.Project.IResourceItem
 
 inheritance:
-  - "Object"
-  - "Bindable"
-  - "ValidatableBindable"
-  - "UndoRedoable"
-  - "Animatable"
-  - "VideoEffectBase"
+  - Object
+  - Bindable
+  - ValidatableBindable
+  - UndoRedoable
+  - Animatable
+  - VideoEffectBase
 
 implements:
-  - "IVideoEffect"
-  - "INotifyPropertyChanged"
-  - "INotifyDataErrorInfo"
-  - "IUndoRedoable"
-  - "IEditable"
-  - "Animatable"
-  - "IFileItem"
-  - "IResourceItem"
+  - IVideoEffect
+  - INotifyPropertyChanged
+  - INotifyDataErrorInfo
+  - IUndoRedoable
+  - IEditable
+  - Animatable
+  - IFileItem
+  - IResourceItem
 
 constructors:
   - name: "[VideoEffectBase()](./constructor)"
@@ -40,9 +39,9 @@ properties:
     description: "エフェクトについて備考を取得または設定します。"
 
 methods:
-  - name: "[Set<T\\>(ref T, T, string, params string[])](./method/set#settref-t-t-string-params-string)"
+  - name: "[Set<T>(ref T, T, string, params string[])](./method/set#settref-t-t-string-params-string)"
     description: "参照渡しされたストレージに値を設定し、変更を通知します。"
-  - name: "[Set<T\\>(Expression<Func<T\\>\\>, T, string, params string[])](./method/set#settexpressionfunct-t-string-params-string)"
+  - name: "[Set<T>(Expression<Func<T>>, T, string, params string[])](./method/set#settexpressionfunct-t-string-params-string)"
     description: "プロパティセレクターを使用してプロパティーに値を設定し、変更を通知します。"
   - name: "[CreateExoVideoFilters(int, ExoOutputDescription)](./method/create-exo-video-filters)"
     description: "Exoとして出力する際に使用する文字列を生成します。"

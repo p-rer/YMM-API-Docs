@@ -20,7 +20,7 @@ public class VideoEffectCategories
 
 | 名前                                 | 説明                 |
 |------------------------------------| ------------------ |
-| [Animation](./field/animation)     | アニメーションカテゴリーのキーの名前 |
+| [Animation](./field/animation.yaml)     | アニメーションカテゴリーのキーの名前 |
 | [Camera](./field/camera)           | カメラカテゴリーのキーの名前     |
 | [Filtering](./field/filtering)     | 加工カテゴリーのキーの名前      |
 | [Composition](./field/composition) | 合成カテゴリーのキーの名前      |
