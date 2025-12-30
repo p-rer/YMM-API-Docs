@@ -9,7 +9,7 @@ export interface TocItem {
 export function TocIndicator({ indicatorStyle }: { indicatorStyle: { top: number; height: number; opacity: number } }) {
   return (
     <div
-      className="absolute left-[-12px] w-[3px] bg-primary rounded-full transition-all duration-300 ease-in-out"
+      className="absolute -left-3 w-0.75 bg-primary rounded-full transition-all duration-300 ease-in-out"
       style={{
         top: `${indicatorStyle.top}px`,
         height: `${indicatorStyle.height}px`,
@@ -45,7 +45,7 @@ export function TableOfContents({
           ref={(el) => setTocItemRef(el, item.id)}
           href={`#${item.id}`}
           className={cn(
-            "text-sm py-1 transition-colors hover:text-primary relative",
+            "text-sm py-1 transition-colors hover:text-accent-foreground relative",
             item.depth === 2 ? "pl-0" : `pl-${(item.depth - 2) * 4}`,
             isTocItemActive(item)
               ? "font-medium text-primary"
