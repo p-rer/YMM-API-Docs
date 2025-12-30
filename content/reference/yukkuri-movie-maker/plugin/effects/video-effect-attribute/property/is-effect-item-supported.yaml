@@ -4,7 +4,7 @@ description: "このエフェクトがエフェクトアイテムに対応して
 namespace: "YukkuriMovieMaker.Plugin.Effects"
 namespaceUrl: "../../.."
 assembly: "YukkuriMovieMaker.Plugin.dll"
-summary: "このエフェクトがエフェクトアイテムに対応しているかを取得または設定します。"
+summary: "このエフェクトがエフェクトアイテムに対応しているかを取得または設定します。コンパイル時に評価される必要があります。"
 
 code: |
   public bool IsEffectItemSupported { get; set; }

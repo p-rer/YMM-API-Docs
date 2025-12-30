@@ -1,0 +1,27 @@
+type: constructor
+title: "コンストラクター"
+description: "VideoEffectAttribute クラスのコンストラクター"
+namespace: "YukkuriMovieMaker.Plugin.Effects"
+namespaceUrl: "../.."
+assembly: "YukkuriMovieMaker.Plugin.dll"
+summary: "[VideoEffect 属性](..)を初期化します。"
+
+overloads:
+  - code: |
+      VideoEffectAttribute(string name, string[] categories, string[] keywords, bool isEffectItemSupported = true, bool isAviUtlSupported = true)
+    parameters:
+      - name: name
+        type: "[String](https://learn.microsoft.com/ja-jp/dotnet/api/system.string)"
+        description: "エフェクトの名前。コンパイル時に評価される必要があります。リソース化対象です。"
+      - name: categories
+        type: "[String](https://learn.microsoft.com/ja-jp/dotnet/api/system.string)[]"
+        description: "エフェクトが所属するカテゴリー。コンパイル時に評価される必要があります。リソース化対象です。"
+      - name: keywords
+        type: "[String](https://learn.microsoft.com/ja-jp/dotnet/api/system.string)[]"
+        description: "検索用キーワード。エフェクトの名前以外でも検索でヒットするために、その文字列を設定します。コンパイル時に評価される必要があります。"
+      - name: isEffectItemSupported
+        type: "[Boolean](https://learn.microsoft.com/ja-jp/dotnet/api/system.boolean)"
+        description: "エフェクトアイテムがこのエフェクトに対応しているか。コンパイル時に評価される必要があります。"
+      - name: isAviUtlSupported
+        type: "[Boolean](https://learn.microsoft.com/ja-jp/dotnet/api/system.boolean)"
+        description: "AviUtlがこのエフェクトに対応しているか。`false`の場合、エフェクト名の隣にYMMのロゴマークが付きます。コンパイル時に評価される必要があります。"

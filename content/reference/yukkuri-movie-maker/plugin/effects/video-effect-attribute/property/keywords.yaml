@@ -4,7 +4,7 @@ description: "エフェクトの検索キーワード"
 namespace: "YukkuriMovieMaker.Plugin.Effects"
 namespaceUrl: "../../.."
 assembly: "YukkuriMovieMaker.Plugin.dll"
-summary: "エフェクトの検索キーワードを取得または設定します。"
+summary: "エフェクトの検索キーワードを取得または設定します。コンパイル時に評価される必要があります。"
 
 code: |
   public string[] Keywords { get; }

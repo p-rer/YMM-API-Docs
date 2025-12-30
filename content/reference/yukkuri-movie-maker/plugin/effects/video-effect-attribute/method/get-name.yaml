@@ -1,0 +1,19 @@
+type: method
+title: "GetName メソッド"
+description: "エフェクトの名前を可能な場合リソースを通過して取得するメソッド"
+namespace: "YukkuriMovieMaker.Plugin.Effects"
+namespaceUrl: "../../.."
+assembly: "YukkuriMovieMaker.Plugin.dll"
+summary: "エフェクトの名前を取得します。"
+
+overloads:
+  - name: "GetName()"
+    description: "\
+      [ResourceType](../property/resource-type) プロパティが有効の時、[Name](../property/name) プロパティの値のプロパティをこのクラスから取得します。\
+      そうでない場合、[Name](../property/name) プロパティの値を返します。\
+      ただし、[Name](../property/name) プロパティの値が\"YMM4Key_\"から始まる場合、Texts クラスからその値から\"YMM4Key_\"を除いたプロパティの値が返されます。"
+    code: |
+      public string[] GetCategories();
+    returns:
+      type: "[String](https://learn.microsoft.com/ja-jp/dotnet/api/system.string)"
+      description: "取得された名前"

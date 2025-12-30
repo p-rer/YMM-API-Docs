@@ -4,6 +4,7 @@ import yaml from "js-yaml"
  * ドキュメントタイプの列挙
  */
 type DocumentType =
+    | "namespace"
     | "class"
     | "constructor"
     | "method"
@@ -27,6 +28,22 @@ interface BaseInfo {
 }
 
 /**
+ * 名前空間ドキュメント
+ */
+interface NamespaceDocument {
+    type: "namespace"
+    title: string
+    description?: string
+    namespace: string
+    summary: string
+    namespaces?: Array<{ name: string; description: string }>
+    classes?: Array<{ name: string; description: string }>
+    interfaces?: Array<{ name: string; description: string }>
+    enums?: Array<{ name: string; description: string }>
+    delegates?: Array<{ name: string; description: string }>
+}
+
+/**
  * クラスドキュメント
  */
 interface ClassDocument extends BaseInfo {
@@ -34,6 +51,7 @@ interface ClassDocument extends BaseInfo {
     code: string
     inheritance?: string[]
     implements?: string[]
+    attributes?: string[]
     constructors?: Array<{ name: string; description: string }>
     properties?: Array<{ name: string; description: string }>
     fields?: Array<{ name: string; description: string }>
@@ -114,6 +132,7 @@ interface FieldDocument extends BaseInfo {
  * 統合ドキュメント型
  */
 type YAMLDocument =
+    | NamespaceDocument
     | ClassDocument
     | ConstructorDocument
     | MethodDocument
@@ -129,6 +148,8 @@ export function yamlToMarkdown(yamlContent: string): string | undefined {
 
         // ドキュメントタイプによって処理を分岐
         switch (data.type) {
+            case "namespace":
+                return generateNamespaceMarkdown(data as NamespaceDocument)
             case "class":
                 return generateClassMarkdown(data as ClassDocument)
             case "constructor":
@@ -140,11 +161,56 @@ export function yamlToMarkdown(yamlContent: string): string | undefined {
             case "field":
                 return generateFieldMarkdown(data as FieldDocument)
             default:
-                throw new Error(`Unknown document type: ${(data as any).type}`)
+                return undefined
         }
     } catch (error) {
         console.error("Error parsing YAML:", error)
     }
+}
+
+/**
+ * 名前空間ドキュメント生成
+ */
+function generateNamespaceMarkdown(data: NamespaceDocument): string {
+    let markdown = ""
+
+    // タイトル
+    markdown += `# ${data.title}\n\n`
+
+    // サマリー
+    markdown += `${data.summary}\n\n`
+
+    // 子名前空間
+    if (data.namespaces && data.namespaces.length > 0) {
+        markdown += `## 名前空間\n\n`
+        markdown += generateTable(["名前空間", "説明"], data.namespaces)
+    }
+
+    // クラス
+    if (data.classes && data.classes.length > 0) {
+        markdown += `## クラス\n\n`
+        markdown += generateTable(["クラス", "説明"], data.classes)
+    }
+
+    // インターフェイス
+    if (data.interfaces && data.interfaces.length > 0) {
+        markdown += `## インターフェイス\n\n`
+        markdown += generateTable(["インターフェイス", "説明"], data.interfaces)
+    }
+
+    // 列挙型
+    if (data.enums && data.enums.length > 0) {
+        markdown += `## 列挙型\n\n`
+        markdown += generateTable(["列挙型", "説明"], data.enums)
+    }
+
+    // デリゲート
+    if (data.delegates && data.delegates.length > 0) {
+        markdown += `## デリゲート\n\n`
+        markdown += generateTable(["デリゲート", "説明"], data.delegates)
+    }
+
+    return markdown.trim()
 }
 
 /**
@@ -183,6 +249,13 @@ function generateClassMarkdown(data: ClassDocument): string {
     // 継承情報
     if (data.inheritance && data.inheritance.length > 0) {
         markdown += `継承 ${data.inheritance.join(" → ")}\n\n`
+    }
+
+    // 属性
+    if (data.attributes && data.attributes.length > 0) {
+        for (const attr of data.attributes) {
+            markdown += `属性 ${attr}\n\n`
+        }
     }
 
     // 実装情報
@@ -296,6 +369,10 @@ function generateMethodMarkdown(data: MethodDocument): string {
     for (const overload of data.overloads) {
         if (data.overloads.length > 1) {
             markdown += `## ${overload.name}\n\n`
+        }
+
+        // 説明
+        if (overload.description && overload.description.length > 0) {
             markdown += `${overload.description}\n\n`
         }
 

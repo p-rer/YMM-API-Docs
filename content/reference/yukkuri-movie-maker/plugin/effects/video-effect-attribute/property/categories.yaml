@@ -4,7 +4,7 @@ description: "エフェクトのカテゴリー"
 namespace: "YukkuriMovieMaker.Plugin.Effects"
 namespaceUrl: "../../.."
 assembly: "YukkuriMovieMaker.Plugin.dll"
-summary: "エフェクトのカテゴリーを取得または設定します。"
+summary: "エフェクトのカテゴリーを取得または設定します。コンパイル時に評価される必要があります。[ResourceType](../resource-type) プロパティを設定すると、それが示すクラスのプロパティ名を使って設定できます。"
 
 code: |
   public string Categories { get; set; }

@@ -4,7 +4,7 @@ description: "エフェクトのリソース型"
 namespace: "YukkuriMovieMaker.Plugin.Effects"
 namespaceUrl: "../../.."
 assembly: "YukkuriMovieMaker.Plugin.dll"
-summary: "エフェクトの各種プロパティーに適用するリソースの型を取得または設定します。"
+summary: "エフェクトの各種プロパティーに適用するリソースの型を取得または設定します。コンパイル時に評価される必要があります。"
 
 code: |
   public Type? ResourceType { get; set; }

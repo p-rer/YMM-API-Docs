@@ -1,0 +1,42 @@
+type: class
+title: "VideoEffectAttribute クラス"
+description: "映像エフェクトの属性クラス"
+namespace: "YukkuriMovieMaker.Plugin.Effects"
+assembly: "YukkuriMovieMaker.Plugin.dll"
+summary: "映像エフェクトの名前、カテゴリーを設定し、[VideoEffectBase](../VideoEffectBase)に付与する属性です。"
+
+code: |
+  [AttributeUsage(AttributeTargets.Class)]
+  public class VideoEffectAttribute : Attribute
+
+inheritance:
+  - Object
+  - Attribute
+  - VideoEffectAttribute
+
+attributes:
+  - "[AttributeUsage](https://learn.microsoft.com/ja-jp/dotnet/api/system.attributeusageattribute)"
+
+constructors:
+  - name: "[VideoEffectAttribute(string, string[], string[], bool, bool)](constructor)"
+    description: "映像エフェクトの詳細を設定します。"
+
+properties:
+  - name: "[Name](property/name.yaml)"
+    description: "エフェクトの名前を取得または設定します。"
+  - name: "[Categories](property/categories.yaml)"
+    description: "エフェクトが所属するカテゴリを取得または設定します。"
+  - name: "[Keywords](property/keywords.yaml)"
+    description: "検索用キーワードを取得または設定します。"
+  - name: "[IsEffectItemSupported](property/is-effect-item-supported.yaml)"
+    description: "エフェクトアイテムがこのエフェクトに対応しているかを取得または設定します。"
+  - name: "[IsAviUtlSupported](property/is-aviutl-supported.yaml)"
+    description: "AviUtlがこのエフェクトに対応しているかを取得または設定します。"
+  - name: "[ResourceType](property/resource-type.yaml)"
+    description: "カスタムリソースの型を取得または設定します。エフェクトのパラメータや名前、カテゴリーの多言語化に使用されます。"
+
+methods:
+  - name: "[GetCategories()](method/get-categories)"
+    description: "エフェクトが所属するカテゴリを取得します。"
+  - name: "[GetName()](method/get-name)"
+    description: "エフェクトの名前を取得します。"
