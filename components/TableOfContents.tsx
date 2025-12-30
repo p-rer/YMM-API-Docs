@@ -31,7 +31,6 @@ interface TableOfContentsProps {
 export function TableOfContents({
   toc,
   tocContainerRef,
-  tocItemRefs,
   isTocItemActive,
   setTocItemRef,
   indicatorStyle,
