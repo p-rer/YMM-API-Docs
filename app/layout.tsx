@@ -27,7 +27,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={"overflow-y-scroll overflow-x-hidden"} suppressHydrationWarning>
     <body className={inter.className}>
-    <NextTopLoader color={"#0a0a0a"} />
+    <NextTopLoader color="#4d54e3" />
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
       {children}
     </ThemeProvider>

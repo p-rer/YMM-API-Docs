@@ -36,7 +36,7 @@ export function DocsBreadcrumbs({ breadcrumbs }: { breadcrumbs: { label: string;
         return rect.width + marginLeft + marginRight
       })
 
-      const totalWidth = itemWidths.reduce((a, b) => a + b, 0) + 8
+      const totalWidth = itemWidths.reduce((a, b) => a + b, 0)
 
       if (totalWidth <= containerWidth) {
         setHiddenType(null)
@@ -47,33 +47,33 @@ export function DocsBreadcrumbs({ breadcrumbs }: { breadcrumbs: { label: string;
 
       const ellipsisWidth = 60
       const homeWidth = itemWidths[0]
-      const lastTwoWidth = itemWidths[itemWidths.length - 2] + itemWidths[itemWidths.length - 1]
 
-      for (let keepFromStart = breadcrumbs.length - 2; keepFromStart >= 0; keepFromStart--) {
-        let calculatedWidth = homeWidth + lastTwoWidth + ellipsisWidth
+      for (let keepFromEnd = breadcrumbs.length; keepFromEnd >= 1; keepFromEnd--) {
+        let calculatedWidth = homeWidth + ellipsisWidth
 
-        for (let i = 0; i < keepFromStart; i++) {
+        for (let i = breadcrumbs.length - keepFromEnd; i < breadcrumbs.length; i++) {
           calculatedWidth += itemWidths[1 + i]
         }
 
         if (calculatedWidth <= containerWidth) {
-          setKeepCount(keepFromStart)
-          if (keepFromStart > 0) {
-            setHiddenType("middle")
-            const hidden = breadcrumbs.slice(keepFromStart, breadcrumbs.length - 2)
+          const hiddenCount = breadcrumbs.length - keepFromEnd
+          if (hiddenCount > 0) {
+            setKeepCount(keepFromEnd)
+            setHiddenType("start")
+            const hidden = breadcrumbs.slice(0, hiddenCount)
             setEllipsisItems(hidden)
           } else {
-            setHiddenType("start")
-            const hidden = breadcrumbs.slice(0, breadcrumbs.length - 2)
-            setEllipsisItems(hidden)
+            setHiddenType(null)
+            setEllipsisItems([])
+            setKeepCount(0)
           }
           return
         }
       }
 
-      setKeepCount(0)
+      setKeepCount(1)
       setHiddenType("start")
-      const hidden = breadcrumbs.slice(0, breadcrumbs.length - 2)
+      const hidden = breadcrumbs.slice(0, breadcrumbs.length - 1)
       setEllipsisItems(hidden)
     }
 
@@ -101,16 +101,10 @@ export function DocsBreadcrumbs({ breadcrumbs }: { breadcrumbs: { label: string;
     if (!hiddenType) {
       return breadcrumbs
     }
-    if (hiddenType === "start") {
-      return [
-        { label: "...", href: "", isEllipsis: true },
-        ...breadcrumbs.slice(breadcrumbs.length - 2),
-      ]
-    }
+    const hiddenCount = breadcrumbs.length - keepCount
     return [
-      ...breadcrumbs.slice(0, keepCount),
       { label: "...", href: "", isEllipsis: true },
-      ...breadcrumbs.slice(breadcrumbs.length - 2),
+      ...breadcrumbs.slice(hiddenCount),
     ]
   }
 
@@ -121,7 +115,7 @@ export function DocsBreadcrumbs({ breadcrumbs }: { breadcrumbs: { label: string;
         <nav
             ref={measureNavRef}
             className="flex items-center space-x-1 text-sm text-muted-foreground absolute invisible pointer-events-none"
-            style={{ paddingLeft: 8, paddingRight: 8, left: -9999 }}
+            style={{ paddingLeft: 8, paddingRight: 8 }}
             aria-hidden="true"
         >
           <Link href="/" className="hover:text-foreground whitespace-nowrap" tabIndex={-1}>

@@ -277,10 +277,9 @@ export async function getDocBySlug(slug: string, isHome = false) {
 
     // Create breadcrumbs
     let breadcrumbs: { label: string; href: string | null }[] = [];
-    if (!isHome)
-      breadcrumbs = pathParts.map((part, index) => {
-        const label = part.replace(/-/g, " ")
-        let href : string | null = "/" + pathParts.slice(0, index + 1).join("/")
+    if (!isHome) {
+      breadcrumbs = await Promise.all(pathParts.map(async (part, index) => {
+        let href: string | null = "/" + pathParts.slice(0, index + 1).join("/")
 
         const filePathParts = href.split("/").map((part) => part.replace(/-/g, " "))
         const filePathWithSpaces = filePathParts.join("/")
@@ -299,6 +298,9 @@ export async function getDocBySlug(slug: string, isHome = false) {
           path.join(DOCS_DIRECTORY, filePathWithSpaces, "index.yml"),
           path.join(DOCS_DIRECTORY, `${href}.yml`),
           path.join(DOCS_DIRECTORY, href, "index.yml"),
+
+          path.join(DOCS_DIRECTORY, filePathWithSpaces, ".name"),
+          path.join(DOCS_DIRECTORY, href, ".name"),
         ]
         let fullPath = ""
         for (const p of possiblePaths) {
@@ -307,12 +309,47 @@ export async function getDocBySlug(slug: string, isHome = false) {
             break
           }
         }
-        if (!fullPath) {
+
+        let label = part.replace(/-/g, " ")
+
+        if (fullPath && !fullPath.endsWith(".name")) {
+          try {
+            const isYAML = fullPath.endsWith(".yaml") || fullPath.endsWith(".yml")
+            const fileContents = isYAML
+                ? yamlToMarkdown(fs.readFileSync(fullPath, "utf8"))
+                : fs.readFileSync(fullPath, "utf8")
+
+            if (fileContents) {
+              const { data, content } = matter(fileContents)
+
+              if (data.title) {
+                label = data.title
+              } else {
+                const h1Match = content.match(/^# (.+)$/m)
+                if (h1Match) {
+                  label = h1Match[1]
+                } else {
+                  label = part.replace(/-/g, " ")
+                      .split(" ")
+                      .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
+                      .join(" ")
+                }
+              }
+            }
+          } catch (error) {
+            console.warn(`Error reading breadcrumb file ${fullPath}:`, error)
+          }
+        } else {
           href = null
+
+          if (fullPath.endsWith(".name")) {
+            label = fs.readFileSync(fullPath, "utf8")
+          }
         }
 
         return { label, href }
-      })
+      }))
+    }
 
     return {
       slug,
@@ -363,17 +400,17 @@ export async function getDocTree() {
       } else {
         title = path.basename(fileName, path.extname(fileName)).replace(/-/g, " ")
         title = title
-          .split(" ")
-          .map((word :string) => word.charAt(0).toUpperCase() + word.slice(1))
-          .join(" ")
+            .split(" ")
+            .map((word :string) => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(" ")
       }
     }
 
     // Handle index files
     const isIndex = path.basename(fileName, path.extname(fileName)) === "index"
     const urlPath = isIndex
-      ? pathParts.map(normalizePathForUrl).join("/")
-      : [...pathParts, path.basename(fileName, path.extname(fileName))].map(normalizePathForUrl).join("/")
+        ? pathParts.map(normalizePathForUrl).join("/")
+        : [...pathParts, path.basename(fileName, path.extname(fileName))].map(normalizePathForUrl).join("/")
 
     // Build tree structure
     let current = tree
@@ -405,17 +442,42 @@ export async function getDocTree() {
     }
   }
 
+  function applyNameFiles(node: any, currentPath: string[] = []) {
+    if (node.children) {
+      for (const key in node.children) {
+        const child = node.children[key]
+        const childPath = [...currentPath, child.name]
+
+        if (!child.title) {
+          const nameFilePath = path.join(DOCS_DIRECTORY, ...childPath, ".name")
+          if (fs.existsSync(nameFilePath)) {
+            try {
+              child.title = fs.readFileSync(nameFilePath, "utf8").trim()
+            } catch (error) {
+              console.warn(`Error reading .name file ${nameFilePath}:`, error)
+            }
+          }
+        }
+
+        applyNameFiles(child, childPath)
+      }
+    }
+    return node
+  }
+
+  applyNameFiles(tree)
+
   // Convert children objects to arrays for easier rendering
   function convertToArray(node: any) {
     if (node.children) {
       node.children = Object.values(node.children)
-        .map((child: any) => convertToArray(child))
-        .sort((a: any, b: any) => {
-          // Sort by whether it's an index file first, then by name
-          if (a.isIndex && !b.isIndex) return -1
-          if (!a.isIndex && b.isIndex) return 1
-          return a.name.localeCompare(b.name)
-        })
+          .map((child: any) => convertToArray(child))
+          .sort((a: any, b: any) => {
+            // Sort by whether it's an index file first, then by name
+            if (a.isIndex && !b.isIndex) return -1
+            if (!a.isIndex && b.isIndex) return 1
+            return a.name.localeCompare(b.name)
+          })
     }
     return node
   }
