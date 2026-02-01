@@ -31,11 +31,11 @@ constructors:
     description: "新しいインスタンスを初期化します。"
 
 properties:
-  - name: "[Label](./property/label)"
+  - name: "[Label](../i-video-effect/property/label)"
     description: "エフェクトの名前を設定します。読み取り専用です。"
-  - name: "[IsEnabled](./property/is-enabled)"
+  - name: "[IsEnabled](../i-video-effect/property/is-enabled)"
     description: "エフェクトの有効または無効を取得または設定します。"
-  - name: "[Remark](./property/remark)"
+  - name: "[Remark](../i-video-effect/property/remark)"
     description: "エフェクトについて備考を取得または設定します。"
 
 methods:
@@ -43,9 +43,9 @@ methods:
     description: "参照渡しされたストレージに値を設定し、変更を通知します。"
   - name: "[Set<T>(Expression<Func<T>>, T, string, params string[])](./method/set#settexpressionfunct-t-string-params-string)"
     description: "プロパティセレクターを使用してプロパティーに値を設定し、変更を通知します。"
-  - name: "[CreateExoVideoFilters(int, ExoOutputDescription)](./method/create-exo-video-filters)"
+  - name: "[CreateExoVideoFilters(int, ExoOutputDescription)](../i-video-effect/method/create-exo-video-filters)"
     description: "Exoとして出力する際に使用する文字列を生成します。"
-  - name: "[CreateVideoEffect(IGraphicsDevicesAndContext)](./method/create-video-effect)"
+  - name: "[CreateVideoEffect(IGraphicsDevicesAndContext)](../i-video-effect/method/create-video-effect)"
     description: "プロセッサーのインスタンスを生成します。"
 
 interfaces:
