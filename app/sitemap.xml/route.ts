@@ -1,6 +1,15 @@
 import { getAllDocPaths, getDocBySlug } from "@/lib/docs"
 import { SITE_URL } from "@/lib/siteSetting"
 
+function escapeXml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;")
+}
+
 export const dynamic = "force-static"
 
 export async function GET() {
@@ -10,7 +19,7 @@ export async function GET() {
       const doc = await getDocBySlug(slug)
       const loc = slug ? `${SITE_URL}/${slug}` : SITE_URL
       const lastmod = doc?.lastUpdated?.toISOString()
-      return `<url><loc>${loc}</loc>${lastmod ? `<lastmod>${lastmod}</lastmod>` : ""}</url>`
+      return `<url><loc>${escapeXml(loc)}</loc>${lastmod ? `<lastmod>${lastmod}</lastmod>` : ""}</url>`
     }),
   )
 
