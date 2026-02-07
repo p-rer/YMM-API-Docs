@@ -3,6 +3,7 @@ import {getAllDocPaths, getDocBySlug, getDocTree, getNextAndPrevDocs} from "@/li
 import type { Metadata } from "next"
 import {generateOgImageStatic} from "@/lib/og";
 import {format} from "date-fns";
+import { SITE_TITLE, SITE_URL } from "@/lib/siteSetting";
 
 type Props = {
   params: Promise<{ slug: string[] }>
@@ -42,8 +43,19 @@ export async function generateMetadata({ params }: Props): Promise<Metadata | un
       title: doc.title,
       description: doc.description,
       openGraph: {
+        title: doc.title,
+        description: doc.description,
+        type: "article",
+        url: `${SITE_URL}/${slug}`,
+        siteName: SITE_TITLE,
         images: [imageDataUri],
-      }
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: doc.title,
+        description: doc.description,
+        images: [imageDataUri],
+      },
     }
   } catch (error) {
     console.log(error)
