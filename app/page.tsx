@@ -1,6 +1,6 @@
 import { getDocBySlug, getDocTree, getNextAndPrevDocs } from "@/lib/docs"
 import { DocsLayout } from "./docs-layout"
-import { generateOgImageStatic } from "@/lib/og";
+import { generateOgImageFile } from "@/lib/og";
 import { SITE_DESCRIPTION, SITE_TITLE, SITE_URL } from "@/lib/siteSetting";
 import {Metadata} from "next";
 
@@ -11,24 +11,28 @@ export async function generateMetadata() : Promise<Metadata | undefined> {
 
     const title = doc?.title || SITE_TITLE
     const description = doc?.description || SITE_DESCRIPTION
-    const imageDataUri = await generateOgImageStatic(title, "");
+    const lastUpdate = doc?.lastUpdated ? String(doc.lastUpdated.getTime()) : ""
+    const imageUrl = await generateOgImageFile("home", title, lastUpdate)
 
     return {
       title,
       description,
+      alternates: {
+        canonical: "/",
+      },
       openGraph: {
         title,
         description,
         type: "website",
         url: SITE_URL,
         siteName: SITE_TITLE,
-        images: [imageDataUri],
+        images: [imageUrl],
       },
       twitter: {
         card: "summary_large_image",
         title,
         description,
-        images: [imageDataUri],
+        images: [imageUrl],
       },
     }
   } catch (error) {
