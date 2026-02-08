@@ -1,9 +1,10 @@
 import React from 'react';
 import satori from 'satori';
 import fs from 'fs';
+import path from 'path';
 import { SITE_TITLE } from './siteSetting';
 
-export async function generateOgImageStatic(title: string, lastUpdate: string): Promise<string> {
+export async function generateOgImagePngBuffer(title: string, lastUpdate: string): Promise<Buffer> {
   const fontData = fs.readFileSync('app/fonts/ZenOldMincho-Medium.ttf');
 
   const jsx = (
@@ -85,7 +86,22 @@ export async function generateOgImageStatic(title: string, lastUpdate: string): 
     ]
   });
   const sharp = require('sharp');
-  const buffer = await sharp(Buffer.from(svg, 'utf-8')).png().toBuffer()
+  return sharp(Buffer.from(svg, 'utf-8')).png().toBuffer()
+}
+
+export async function generateOgImageStatic(title: string, lastUpdate: string): Promise<string> {
+  const buffer = await generateOgImagePngBuffer(title, lastUpdate)
 
   return `data:image/png;base64,${buffer.toString('base64')}`;
+}
+
+export async function generateOgImageFile(fileName: string, title: string, lastUpdate: string): Promise<string> {
+  const publicDir = path.join(process.cwd(), 'public', 'og')
+  const outputPath = path.join(publicDir, `${fileName}.png`)
+  if (!fs.existsSync(outputPath)) {
+    fs.mkdirSync(publicDir, { recursive: true })
+    const buffer = await generateOgImagePngBuffer(title, lastUpdate)
+    fs.writeFileSync(outputPath, buffer)
+  }
+  return `/og/${fileName}.png`
 }
