@@ -8,79 +8,52 @@ import { usePathname } from "next/navigation"
 type Target = {
   id: string
   element: HTMLElement
-}
-
-type Position = {
-  top: number
-  left: number
+  pre: HTMLElement
+  wrapper: HTMLElement
 }
 
 export function CodeCopyButtons() {
   const pathname = usePathname()
   const [targets, setTargets] = useState<Target[]>([])
-  const [positions, setPositions] = useState<Record<string, Position>>({})
   const [copiedId, setCopiedId] = useState<string | null>(null)
 
   useEffect(() => {
     const preElements = Array.from(document.querySelectorAll(".prose pre")) as HTMLElement[]
-    const mapped = preElements.map((element, index) => {
-      return { id: `code-copy-${index}`, element }
-    })
+    const mapped: Target[] = []
+
+    for (const [index, preElement] of preElements.entries()) {
+      const parent = preElement.parentElement
+      if (!parent) continue
+
+      const wrapper = document.createElement("div")
+      wrapper.dataset.codeCopyWrapper = "true"
+      wrapper.className = "relative"
+
+      parent.insertBefore(wrapper, preElement)
+      wrapper.append(preElement)
+
+      const host = document.createElement("div")
+      host.dataset.codeCopyHost = "true"
+      host.className = "pointer-events-none sticky top-16 z-10 -mb-10 flex h-0 justify-end pr-2 pt-2 lg:top-2"
+      wrapper.prepend(host)
+
+      mapped.push({ id: `code-copy-${index}`, element: host, pre: preElement, wrapper })
+    }
+
     setTargets(mapped)
-  }, [pathname])
-
-  useEffect(() => {
-    if (targets.length === 0) {
-      setPositions({})
-      return
-    }
-
-    const buttonSize = 28
-    const margin = 8
-    let rafId = 0
-
-    const updatePositions = () => {
-      const headerBottom = (document.querySelector("header.sticky") as HTMLElement | null)?.getBoundingClientRect().bottom ?? 0
-      const viewportTopLimit = headerBottom + margin
-      const nextPositions: Record<string, Position> = {}
-
-      for (const target of targets) {
-        const rect = target.element.getBoundingClientRect()
-        const minTop = rect.top + margin
-        const maxTop = rect.bottom - buttonSize - margin
-        const desiredTop = Math.max(minTop, viewportTopLimit)
-        const top = Math.min(desiredTop, maxTop)
-
-        if (maxTop >= minTop) {
-          nextPositions[target.id] = {
-            top,
-            left: rect.right - buttonSize - margin,
-          }
-        }
-      }
-
-      setPositions(nextPositions)
-    }
-
-    const onScrollOrResize = () => {
-      cancelAnimationFrame(rafId)
-      rafId = window.requestAnimationFrame(updatePositions)
-    }
-
-    updatePositions()
-    window.addEventListener("scroll", onScrollOrResize, { passive: true })
-    window.addEventListener("resize", onScrollOrResize)
 
     return () => {
-      cancelAnimationFrame(rafId)
-      window.removeEventListener("scroll", onScrollOrResize)
-      window.removeEventListener("resize", onScrollOrResize)
+      for (const target of mapped) {
+        if (target.wrapper.parentElement) {
+          target.wrapper.replaceWith(target.pre)
+        }
+      }
     }
-  }, [targets])
+  }, [pathname])
 
   async function handleCopy(target: Target) {
-    const code = target.element.querySelector("code")
-    const text = code?.textContent || target.element.textContent || ""
+    const code = target.pre.querySelector("code")
+    const text = code?.textContent || target.pre.textContent || ""
     if (!text) return
     await navigator.clipboard.writeText(text)
     setCopiedId(target.id)
@@ -89,24 +62,20 @@ export function CodeCopyButtons() {
 
   return (
     <>
-      {targets.map((target) => {
-        const position = positions[target.id]
-        if (!position) return null
-
-        return createPortal(
+      {targets.map((target) =>
+        createPortal(
           <button
             key={target.id}
             type="button"
             onClick={() => void handleCopy(target)}
-            className="fixed z-40 rounded-md bg-black/80 p-1.5 text-white backdrop-blur hover:bg-black"
-            style={{ top: `${position.top}px`, left: `${position.left}px` }}
+            className="pointer-events-auto rounded-md bg-black/80 p-1.5 text-white backdrop-blur hover:bg-black"
             aria-label="Copy code"
           >
             {copiedId === target.id ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
           </button>,
-          document.body,
-        )
-      })}
+          target.element,
+        ),
+      )}
     </>
   )
 }

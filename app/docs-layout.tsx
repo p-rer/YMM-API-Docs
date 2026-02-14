@@ -215,6 +215,7 @@ export function DocsLayout({ children, docTree, toc, title, lastUpdated, breadcr
           <PrevNextNav prevNext={prevNext} />
         </div>
       </div>
+      <CodeCopyButtons />
     </div>
   )
 }
