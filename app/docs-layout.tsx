@@ -181,6 +181,7 @@ export function DocsLayout({ children, docTree, toc, title, lastUpdated, breadcr
               <LastUpdated lastUpdated={lastUpdated} />
             </div>
             <div className="prose prose-slate dark:prose-invert max-w-none">{children}</div>
+            <CodeCopyButtons />
             <PrevNextNav prevNext={prevNext} />
           </div>
         </div>
@@ -210,6 +211,7 @@ export function DocsLayout({ children, docTree, toc, title, lastUpdated, breadcr
           <DocsBreadcrumbs breadcrumbs={breadcrumbs} />
           <LastUpdated lastUpdated={lastUpdated} />
           <div className="prose prose-slate dark:prose-invert max-w-none">{children}</div>
+          <CodeCopyButtons />
           <PrevNextNav prevNext={prevNext} />
         </div>
       </div>
