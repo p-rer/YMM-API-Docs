@@ -116,3 +116,12 @@
     @apply min-w-2xs
   }
 }
+
+@layer base {
+  @supports (text-spacing-trim: trim-start) {
+    body,
+    .prose {
+      text-spacing-trim: trim-start;
+    }
+  }
+}

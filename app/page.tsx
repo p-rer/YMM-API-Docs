@@ -1,7 +1,7 @@
 import { getDocBySlug, getDocTree, getNextAndPrevDocs } from "@/lib/docs"
 import { DocsLayout } from "./docs-layout"
-import { generateOgImageStatic } from "@/lib/og";
-import { SITE_DESCRIPTION, SITE_TITLE } from "@/lib/siteSetting";
+import { generateOgImageFile } from "@/lib/og";
+import { SITE_DESCRIPTION, SITE_TITLE, SITE_URL } from "@/lib/siteSetting";
 import {Metadata} from "next";
 
 // Add dynamic metadata generation
@@ -9,16 +9,31 @@ export async function generateMetadata() : Promise<Metadata | undefined> {
   try {
     const doc = await getDocBySlug("")
 
-    const imageDataUri = await generateOgImageStatic("HOME", "");
-    if (!doc) {
-      return {
-        title: SITE_TITLE,
-        description: SITE_DESCRIPTION,
-        openGraph: {
-          images: [imageDataUri],
-          title: SITE_TITLE
-        }
-      }
+    const title = doc?.title || SITE_TITLE
+    const description = doc?.description || SITE_DESCRIPTION
+    const lastUpdate = doc?.lastUpdated ? String(doc.lastUpdated.getTime()) : ""
+    const imageUrl = await generateOgImageFile("home", title, lastUpdate)
+
+    return {
+      title,
+      description,
+      alternates: {
+        canonical: "/",
+      },
+      openGraph: {
+        title,
+        description,
+        type: "website",
+        url: SITE_URL,
+        siteName: SITE_TITLE,
+        images: [imageUrl],
+      },
+      twitter: {
+        card: "summary_large_image",
+        title,
+        description,
+        images: [imageUrl],
+      },
     }
   } catch (error) {
     console.error("Error generating homepage metadata:", error)
@@ -68,4 +83,3 @@ export default async function HomePage() {
     )
   }
 }
-

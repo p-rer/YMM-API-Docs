@@ -242,6 +242,18 @@ export async function getDocBySlug(slug: string, isHome = false) {
       }
     }
 
+    if (!description) {
+      const plainText = content
+        .replace(/^#\s+.+$/gm, "")
+        .replace(/```[\s\S]*?```/g, "")
+        .replace(/`([^`]+)`/g, "$1")
+        .replace(/\[([^\]]+)\]\(([^)]+)\)/g, "$1")
+        .replace(/[*_>#-]/g, " ")
+        .replace(/\s+/g, " ")
+        .trim()
+      description = plainText.slice(0, 160)
+    }
+
     // Get last updated date (from Git if possible, fallback to file stats)
     let lastUpdated
     try {
