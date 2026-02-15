@@ -18,10 +18,18 @@ export function CodeCopyButtons() {
   const [copiedId, setCopiedId] = useState<string | null>(null)
 
   useEffect(() => {
+    const existingWrappers = Array.from(document.querySelectorAll("[data-code-copy-wrapper='true']")) as HTMLElement[]
+    for (const wrapper of existingWrappers) {
+      const pre = wrapper.querySelector("pre")
+      if (pre) wrapper.replaceWith(pre)
+      else wrapper.remove()
+    }
+
     const preElements = Array.from(document.querySelectorAll(".prose pre")) as HTMLElement[]
     const mapped: Target[] = []
 
     for (const [index, preElement] of preElements.entries()) {
+      if (preElement.offsetParent === null) continue
       const parent = preElement.parentElement
       if (!parent) continue
 
@@ -34,7 +42,7 @@ export function CodeCopyButtons() {
 
       const host = document.createElement("div")
       host.dataset.codeCopyHost = "true"
-      host.className = "pointer-events-none sticky top-16 z-10 -mb-10 flex h-0 justify-end pr-2 pt-2 lg:top-2"
+      host.className = "pointer-events-none sticky top-16 z-10 mb-[-2.5rem] flex h-10 justify-end pr-2 pt-2 lg:top-2"
       wrapper.prepend(host)
 
       mapped.push({ id: `code-copy-${index}`, element: host, pre: preElement, wrapper })
