@@ -17,6 +17,7 @@ import { PrevNextNav } from "../components/PrevNextNav"
 import { SearchBox } from "../components/SearchBox"
 import { DocTree } from "../components/DocTree"
 import { TableOfContents } from "../components/TableOfContents"
+import { CodeCopyButtons } from "../components/CodeCopyButtons"
 
 import { useFilteredTree } from "../hooks/useFilteredTree"
 import { useVisibleHeadings } from "../hooks/useVisibleHeadings"
@@ -212,6 +213,7 @@ export function DocsLayout({ children, docTree, toc, title, lastUpdated, breadcr
           <PrevNextNav prevNext={prevNext} />
         </div>
       </div>
+      <CodeCopyButtons />
     </div>
   )
 }
