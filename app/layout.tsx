@@ -2,13 +2,14 @@ import type React from "react"
 import "../styles/globals.css"
 import { Inter } from "next/font/google"
 import { ThemeProvider } from "@/components/theme-provider"
-import { SITE_DESCRIPTION, SITE_TITLE } from "@/lib/siteSetting"
+import { SITE_DESCRIPTION, SITE_TITLE, SITE_URL } from "@/lib/siteSetting"
 import {Metadata} from "next";
 import NextTopLoader from "nextjs-toploader";
 
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata : Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
     template: `%s | ${SITE_TITLE}`,
     default: SITE_TITLE,
@@ -35,4 +36,3 @@ export default function RootLayout({
     </html>
   )
 }
-
