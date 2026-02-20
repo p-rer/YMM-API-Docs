@@ -123,8 +123,9 @@ IUnknown
 2. 古い Device 上で作成した Brush は新しい Device では使用できない
 3. 新しい Device で Brush を再生成すれば描画は成功する
 
+### C++
 <details>
-  <summary>C++</summary>
+  <summary>コード</summary>
 
 ```cpp
 #include <windows.h>
@@ -287,6 +288,23 @@ int main()
     return 0;
 }
 
+```
+</details>
+
+<details>
+    <summary>実行結果</summary>
+
+```
+Geometry created
+Device created and target set
+First draw
+Draw success
+Device destroyed
+Device created and target set
+Second draw with OLD brush
+Draw failed hr=0x88990015
+Third draw with NEW brush
+Draw success
 ```
 </details>
 
