@@ -125,3 +125,16 @@
     }
   }
 }
+
+
+@layer base {
+  a[data-footnote-backref] {
+    display: inline-flex;
+    vertical-align: middle;
+    line-height: 1;
+  }
+
+  a[data-footnote-backref] svg {
+    display: block;
+  }
+}

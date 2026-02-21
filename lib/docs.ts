@@ -25,7 +25,7 @@ const DOCS_DIRECTORY = path.join(process.cwd(), "content")
 
 function replaceFootnoteBackrefSymbol(html: string): string {
   const undo2Icon = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a4 4 0 1 1 0 8h-1"/></svg>'
-  return html.replace(/(<a[^>]*data-footnote-backref[^>]*>)(?:↩︎?|&#8617;)(<\/a>)/g, `$1${undo2Icon}$2`)
+  return html.replace(/(<a[^>]*data-footnote-backref[^>]*>)([\s\S]*?)(<\/a>)/g, `$1${undo2Icon}$3`)
 }
 
 // Convert spaces to hyphens in URL paths

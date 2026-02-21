@@ -26,7 +26,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className={"overflow-y-scroll overflow-x-hidden"} suppressHydrationWarning>
+    <html lang="en" className={"overflow-y-scroll"} suppressHydrationWarning>
     <body className={inter.className}>
     <NextTopLoader color="#4d54e3" />
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
