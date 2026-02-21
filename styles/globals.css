@@ -137,4 +137,107 @@
   a[data-footnote-backref] svg {
     display: block;
   }
+
+  .prose details {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto 0fr;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    margin: 1rem 0;
+    border-bottom: 1px solid hsl(var(--border));
+    transition: grid-template-rows 0.16s ease-out;
+  }
+
+  .prose details[open] {
+    grid-template-rows: auto 1fr;
+  }
+
+  .prose details > summary {
+    position: sticky;
+    top: 3.5rem;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0.625rem 0;
+    cursor: pointer;
+    user-select: none;
+    font-weight: 600;
+    background: hsl(var(--background));
+    color: hsl(var(--foreground));
+    transition: color 0.16s ease-out;
+  }
+
+  .prose details > summary:hover {
+    color: hsl(var(--accent-foreground));
+  }
+
+  .prose details > summary::marker,
+  .prose details > summary::-webkit-details-marker {
+    display: none;
+    content: "";
+  }
+
+  .prose details > summary::after {
+    content: "";
+    width: 0.55rem;
+    height: 0.55rem;
+    border-right: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+    transform: rotate(45deg) translateY(-1px);
+    transform-origin: center;
+    transition: transform 0.16s ease-out;
+  }
+
+  .prose details[open] > summary::after {
+    transform: rotate(225deg) translateY(-1px);
+  }
+
+  .prose details > *:not(summary) {
+    min-height: 0;
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+    padding: 0 0 0.875rem;
+  }
+
+  .prose details > *:not(summary):first-of-type {
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+  }
+
+
+  .prose [data-code-copy-wrapper='true'] {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .prose pre {
+    width: 100% !important;
+    max-width: 100%;
+    min-width: 0;
+    overflow-x: auto;
+    box-sizing: border-box;
+  }
+
+  .prose pre.shiki {
+    width: 100% !important;
+  }
+
+  .prose pre code {
+    display: block;
+    width: max-content;
+    min-width: 100%;
+  }
+
+  @media (min-width: 1024px) {
+    .prose details > summary {
+      top: 0;
+    }
+  }
 }
