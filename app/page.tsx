@@ -50,7 +50,7 @@ export default async function HomePage() {
 
     if (!doc) {
       return (
-        <div className="flex min-h-screen flex-col items-center justify-center">
+        <div className="flex min-h-[100dvh] flex-col items-center justify-center">
           <h1 className="text-3xl font-bold">Welcome to Documentation</h1>
           <p className="mt-4">Please create an index.md file in your content directory.</p>
         </div>
@@ -76,7 +76,7 @@ export default async function HomePage() {
   } catch (error) {
     console.error("Error rendering homepage:", error)
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center">
+      <div className="flex min-h-[100dvh] flex-col items-center justify-center">
         <h1 className="text-3xl font-bold">Error Loading Documentation</h1>
         <p className="mt-4">There was an error loading the documentation. Please check your content files.</p>
       </div>

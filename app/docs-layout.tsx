@@ -72,7 +72,7 @@ export function DocsLayout({ children, docTree, toc, title, lastUpdated, breadcr
   }
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-[100dvh] flex-col">
       {/* Mobile Header */}
       <header className="sticky top-0 z-50 flex h-14 items-center gap-4 border-b bg-background px-4 sm:px-6 lg:hidden">
         {/* Mobile DocTree (Sheet) */}
@@ -89,7 +89,7 @@ export function DocsLayout({ children, docTree, toc, title, lastUpdated, breadcr
             <div className="px-4 py-2">
               <SearchBox searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
             </div>
-            <ScrollArea className="h-[calc(100vh-8rem)] pb-10">
+            <ScrollArea className="h-[calc(100dvh-8rem)] pb-10">
               <div className="px-4 py-2">
                 <DocTree nodes={filteredTree} pathname={pathname} />
               </div>
@@ -118,7 +118,7 @@ export function DocsLayout({ children, docTree, toc, title, lastUpdated, breadcr
           {/* FULL WIDTH FOR MOBILE */}
           <SheetContent side="right" className="w-full max-w-full sm:w-full sm:max-w-xl">
             <div className="px-4 py-2 font-medium">On This Page</div>
-            <ScrollArea className="h-[calc(100vh-8rem)] pb-10">
+            <ScrollArea className="h-[calc(100dvh-8rem)] pb-10">
               <div className="px-4 py-2">
                 <TableOfContents
                   toc={toc}
@@ -156,7 +156,7 @@ export function DocsLayout({ children, docTree, toc, title, lastUpdated, breadcr
           <div className="p-4">
             <SearchBox searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
           </div>
-          <ScrollArea className="h-[calc(100vh-8rem)]">
+          <ScrollArea className="h-[calc(100dvh-8rem)]">
             <div className="px-4 py-2">
               <DocTree nodes={filteredTree} pathname={pathname} />
             </div>
@@ -189,7 +189,7 @@ export function DocsLayout({ children, docTree, toc, title, lastUpdated, breadcr
         {/* Right Sidebar: TOC */}
         <div className="fixed inset-y-0 right-0 w-64 border-l bg-background">
           <div className="h-14 px-4 py-4 font-medium">On This Page</div>
-          <ScrollArea className="h-[calc(100vh-6.5rem)]">
+          <ScrollArea className="h-[calc(100dvh-6.5rem)]">
             <div className="px-4 py-4">
               <TableOfContents
                 toc={toc}

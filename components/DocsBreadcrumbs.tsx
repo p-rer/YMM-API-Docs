@@ -111,10 +111,10 @@ export function DocsBreadcrumbs({ breadcrumbs }: { breadcrumbs: { label: string;
   const displayBreadcrumbs = getDisplayBreadcrumbs()
 
   return (
-      <div ref={containerRef} className={"w-full mb-4 overflow-x-auto"}>
+      <div ref={containerRef} className={"relative w-full mb-4 overflow-x-auto min-w-0"}>
         <nav
             ref={measureNavRef}
-            className="flex items-center space-x-1 text-sm text-muted-foreground absolute invisible pointer-events-none"
+            className="fixed -left-[9999px] top-0 z-[-1] flex items-center space-x-1 text-sm text-muted-foreground opacity-0 pointer-events-none"
             style={{ paddingLeft: 8, paddingRight: 8 }}
             aria-hidden="true"
         >
@@ -170,7 +170,7 @@ export function DocsBreadcrumbs({ breadcrumbs }: { breadcrumbs: { label: string;
                             className="bg-popover border rounded shadow-lg min-w-50 max-w-full py-2"
                             style={{
                               whiteSpace: "nowrap",
-                              maxHeight: "70vh",
+                              maxHeight: "70dvh",
                               overflowY: "auto",
                             }}
                             onClick={e => e.stopPropagation()}
