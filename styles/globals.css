@@ -210,10 +210,24 @@
   }
 
 
-  .prose details pre,
-  .prose details .shiki {
+  .prose [data-code-copy-wrapper='true'] {
+    width: 100%;
     max-width: 100%;
+    min-width: 0;
+  }
+
+  .prose pre {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
     overflow-x: auto;
+    box-sizing: border-box;
+  }
+
+  .prose pre code {
+    display: block;
+    width: max-content;
+    min-width: 100%;
   }
 
   @media (min-width: 1024px) {
