@@ -138,7 +138,7 @@ export function DocsLayout({ children, docTree, toc, title, lastUpdated, breadcr
       <div className="hidden lg:flex">
         {/* Left Sidebar: DocTree */}
         <div
-          className="fixed inset-y-0 left-0 border-r bg-background overflow-x-auto"
+          className="fixed top-0 left-0 h-[100dvh] border-r bg-background overflow-x-auto"
           style={{
             width: isTreeHovered ? "calc(33.33vw)" : "16rem",
             maxWidth: "calc(33.33vw)",
@@ -187,7 +187,7 @@ export function DocsLayout({ children, docTree, toc, title, lastUpdated, breadcr
         </div>
 
         {/* Right Sidebar: TOC */}
-        <div className="fixed inset-y-0 right-0 w-64 border-l bg-background">
+        <div className="fixed top-0 right-0 h-[100dvh] w-64 border-l bg-background">
           <div className="h-14 px-4 py-4 font-medium">On This Page</div>
           <ScrollArea className="h-[calc(100dvh-6.5rem)]">
             <div className="px-4 py-4">
