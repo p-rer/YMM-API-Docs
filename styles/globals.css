@@ -209,6 +209,13 @@
     padding-top: 0.75rem;
   }
 
+
+  .prose details pre,
+  .prose details .shiki {
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
   @media (min-width: 1024px) {
     .prose details > summary {
       top: 0;
