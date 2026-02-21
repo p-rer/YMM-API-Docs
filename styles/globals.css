@@ -141,8 +141,10 @@
   .prose details {
     display: grid;
     grid-template-rows: auto 0fr;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
     margin: 1rem 0;
-    border-top: 1px solid hsl(var(--border));
     border-bottom: 1px solid hsl(var(--border));
     transition: grid-template-rows 0.16s ease-out;
   }
@@ -196,13 +198,14 @@
 
   .prose details > *:not(summary) {
     min-height: 0;
+    min-width: 0;
+    max-width: 100%;
     overflow: hidden;
     padding: 0 0 0.875rem;
   }
 
   .prose details > *:not(summary):first-of-type {
     margin-top: 0.75rem;
-    border-top: 1px solid hsl(var(--border));
     padding-top: 0.75rem;
   }
 
