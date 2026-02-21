@@ -140,6 +140,7 @@
 
   .prose details {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     grid-template-rows: auto 0fr;
     width: 100%;
     max-width: 100%;
@@ -217,11 +218,15 @@
   }
 
   .prose pre {
-    width: 100%;
+    width: 100% !important;
     max-width: 100%;
     min-width: 0;
     overflow-x: auto;
     box-sizing: border-box;
+  }
+
+  .prose pre.shiki {
+    width: 100% !important;
   }
 
   .prose pre code {
