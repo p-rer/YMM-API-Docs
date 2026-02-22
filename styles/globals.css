@@ -215,6 +215,17 @@
     width: 100%;
     max-width: 100%;
     min-width: 0;
+    border: 1px solid hsl(var(--border));
+    background: hsl(var(--background));
+  }
+
+  .prose [data-code-copy-wrapper='true'] [data-code-copy-host='true'] {
+    position: relative;
+    z-index: 1;
+  }
+
+  .prose [data-code-copy-wrapper='true'] .code-copy-header {
+    width: 100%;
   }
 
   .prose pre {
@@ -223,6 +234,11 @@
     min-width: 0;
     overflow-x: auto;
     box-sizing: border-box;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: hsl(var(--background)) !important;
   }
 
   .prose pre.shiki {
