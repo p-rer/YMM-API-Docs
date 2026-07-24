@@ -1,14 +1,14 @@
 import fs from "fs"
 import path from "path"
 import matter from "gray-matter"
+import { Document } from "flexsearch"
 import { readDocFileAsMarkdown, resolveDocPath } from "@/lib/doc-markdown"
 import { getAllDocPaths } from "@/lib/docs"
 
-export interface SearchIndexEntry {
+export interface SearchMeta {
   id: number
   slug: string
   title: string
-  body: string
   section: string
 }
 
@@ -25,35 +25,99 @@ function markdownToPlainText(markdown: string): string {
 
 async function buildSearchIndex() {
   const slugs = getAllDocPaths()
-  const entries: SearchIndexEntry[] = []
+
+  const index = new Document({
+    tokenize: "full",
+    resolution: 9,
+    cache: false,
+    document: {
+      id: "id",
+      index: [
+        { field: "title", tokenize: "full", resolution: 9 },
+        { field: "body",  tokenize: "full", resolution: 3 },
+      ],
+      store: false,
+    },
+  })
+
+  const bodies: Record<string, string> = {}
+  const metaList: SearchMeta[] = []
   let id = 0
 
   for (const slug of slugs) {
     const fullPath = resolveDocPath(slug, slug === "")
     if (!fullPath) continue
-
     const raw = readDocFileAsMarkdown(fullPath)
     if (!raw) continue
-
     const { data, content } = matter(raw)
-
-    let title = data.title as string | undefined
-    if (!title) {
-      const h1 = content.match(/^# (.+)$/m)
-      title = h1 ? h1[1] : path.basename(slug)
-    }
-
+    const title: string =
+      (data.title as string | undefined) ??
+      content.match(/^# (.+)$/m)?.[1] ??
+      path.basename(slug)
     const body = markdownToPlainText(content)
     const section = slug.split("/")[0] ?? ""
 
-    entries.push({ id: id++, slug, title, body, section })
+    index.add({ id, slug, title, body })
+    bodies[slug] = body
+    metaList.push({ id, slug, title, section })
+    id++
   }
 
-  const outputPath = path.join(process.cwd(), "public", "search-index.json")
-  fs.mkdirSync(path.dirname(outputPath), { recursive: true })
-  fs.writeFileSync(outputPath, JSON.stringify(entries), "utf-8")
+  // シャードを public/search-index/ に出力
+  const shardDir = path.join(process.cwd(), "public", "search-index")
+  fs.rmSync(shardDir, { recursive: true, force: true })
+  fs.mkdirSync(shardDir, { recursive: true })
 
-  console.log(`Search index built: ${entries.length} entries → ${outputPath}`)
+  const shardKeys: string[] = []
+
+  await new Promise<void>((resolve) => {
+    let pending = 0
+    let exportDone = false
+
+    index.export((key: string, data: string | object | undefined) => {
+      pending++
+      const safeName = String(key).replace(/[^a-zA-Z0-9_-]/g, "_")
+      shardKeys.push(safeName)
+      const serialized = data === undefined ? "null" : JSON.stringify(data)
+      fs.writeFile(
+        path.join(shardDir, `${safeName}.json`),
+        serialized,
+        "utf-8",
+        () => {
+          pending--
+          if (exportDone && pending === 0) resolve()
+        },
+      )
+      exportDone = true
+    })
+
+    // export() がコールバックを一切呼ばなかった場合（空インデックス）
+    setImmediate(() => {
+      exportDone = true
+      if (pending === 0) resolve()
+    })
+  })
+
+  // シャードキー一覧を manifest として保存（クライアントがどのファイルを読むか知るため）
+  fs.writeFileSync(
+    path.join(shardDir, "manifest.json"),
+    JSON.stringify(shardKeys),
+    "utf-8",
+  )
+
+  const publicDir = path.join(process.cwd(), "public")
+  fs.writeFileSync(
+    path.join(publicDir, "search-meta.json"),
+    JSON.stringify(metaList),
+    "utf-8",
+  )
+  fs.writeFileSync(
+    path.join(publicDir, "search-bodies.json"),
+    JSON.stringify(bodies),
+    "utf-8",
+  )
+
+  console.log(`Search index built: ${id} docs, ${shardKeys.length} shards → public/search-index/`)
 }
 
 buildSearchIndex().catch((e) => {

@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Search, X } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { prefetchBodies } from "@/hooks/useFullTextSearch"
 
 interface SearchBoxProps {
   searchQuery: string
@@ -26,7 +27,10 @@ export function SearchBox({
         className={cn("pl-8 rounded-none", inputClassName)}
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
-        onFocus={onFocus}
+        onFocus={() => {
+          prefetchBodies()
+          onFocus?.()
+        }}
       />
       {searchQuery && (
         <Button

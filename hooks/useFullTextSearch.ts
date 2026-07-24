@@ -45,6 +45,18 @@ function makeExcerpt(body: string, query: string): string {
   );
 }
 
+// bodies はフォーカス時に先読みし、検索前に揃えておく
+let bodiesLoadPromise: Promise<void> | null = null;
+let bodiesData: Record<string, string> | null = null;
+
+export function prefetchBodies(): void {
+  if (bodiesData || bodiesLoadPromise) return;
+  bodiesLoadPromise = fetch("/search-bodies.json")
+    .then((r) => r.json())
+    .then((data) => { bodiesData = data; })
+    .catch(() => {});
+}
+
 export function useFullTextSearch(query: string): {
   results: SearchResult[];
   isIndexLoading: boolean;
@@ -69,16 +81,18 @@ export function useFullTextSearch(query: string): {
       setResults([]);
 
       try {
-        const [FlexSearchModule, res] = await Promise.all([
+        const [FlexSearchModule, manifestRes, metaRes] = await Promise.all([
           import("flexsearch"),
-          fetch("/search-index.json"),
+          fetch("/search-index/manifest.json"),
+          fetch("/search-meta.json"),
         ]);
 
-        if (!res.ok) {
-          throw new Error(`HTTP ${res.status}`);
-        }
+        if (!manifestRes.ok) throw new Error(`manifest: HTTP ${manifestRes.status}`);
+        if (!metaRes.ok) throw new Error(`meta: HTTP ${metaRes.status}`);
 
-        const entries: SearchIndexEntry[] = await res.json();
+        const shardKeys: string[] = await manifestRes.json();
+        const metaList: { id: number; slug: string; title: string; section: string }[] =
+          await metaRes.json();
 
         const FlexSearch =
           (FlexSearchModule as any).default ?? FlexSearchModule;
@@ -97,9 +111,28 @@ export function useFullTextSearch(query: string): {
           },
         });
 
-        for (const entry of entries) {
-          bodyMapRef.current.set(entry.slug, entry.body);
-          index.add(entry);
+        // シャードを並列フェッチして import
+        await Promise.all(
+          shardKeys.map(async (safeName) => {
+            const res = await fetch(`/search-index/${safeName}.json`);
+            const data = await res.json();
+            if (data !== null) {
+              index.import(safeName.replace(/_/g, "."), data);
+            }
+          }),
+        );
+
+        // bodyMapRef に bodies を充填
+        // prefetchBodies() が完了していればそれを使い、未完了なら待つ
+        if (!bodiesData) {
+          prefetchBodies();
+          await bodiesLoadPromise;
+        }
+        if (bodiesData) {
+          for (const { slug } of metaList) {
+            const body = bodiesData[slug];
+            if (body) bodyMapRef.current.set(slug, body);
+          }
         }
 
         indexRef.current = index;
@@ -115,6 +148,8 @@ export function useFullTextSearch(query: string): {
 
     return indexPromiseRef.current;
   }, []);
+
+  // --- 以下は元のコードと完全に同一 ---
 
   const performSearch = useCallback(
     async (searchQuery: string) => {
