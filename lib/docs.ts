@@ -67,6 +67,32 @@ function extractHeadings() {
   };
 }
 
+// ファイル名から (数字)~ を取り除き、数字を抽出
+function extractHiddenNumberAndRest(filename: string): { number: number | null; rest: string } {
+  const match = filename.match(/^\((\d+)\)~/);
+  if (match) {
+    return { number: parseInt(match[1], 10), rest: filename.slice(match[0].length) };
+  }
+  return { number: null, rest: filename };
+}
+
+// タイトル先頭の数字を抽出
+function extractLeadingNumber(title: string): number | null {
+  const match = title.match(/^(\d+)/);
+  return match ? parseInt(match[1], 10) : null;
+}
+
+// ノードのソート情報（優先数字とテキスト）を取得
+function getNodeSortInfo(node: any): { number: number | null; text: string } {
+  let number = node.hiddenNumber ?? null;
+  if (number === null) {
+    const title = node.title || node.name || '';
+    number = extractLeadingNumber(title);
+  }
+  const text = node.title || node.name || '';
+  return { number, text };
+}
+
 // Remark plugin that modifies link nodes.
 const remarkLinkModifier: Plugin = () => {
   return (tree: any) => {
@@ -110,7 +136,11 @@ export function getAllDocPaths() {
           return path.dirname(filePathWithoutExt).split(path.sep).join("/")
         }
 
-        return filePathWithoutExt
+        const fileName = path.basename(filePathWithoutExt);
+        const { rest } = extractHiddenNumberAndRest(fileName);
+        const dirPath = path.dirname(filePathWithoutExt);
+        const newPath = path.join(dirPath, rest);
+        return newPath.split(path.sep).join("/");
       })
       .map(normalizePathForUrl)
 }
@@ -376,9 +406,7 @@ export async function getDocTree() {
     const isYAML = file.endsWith(".yaml") || file.endsWith(".yml")
     const rawFile = fs.readFileSync(file, "utf8")
     const fileContents = isYAML
-      ? (isApiDocument(rawFile)
-        ? renderApiDocToMarkdown(rawFile)
-        : yamlToMarkdown(rawFile))
+      ? (isApiDocument(rawFile) ? renderApiDocToMarkdown(rawFile) : yamlToMarkdown(rawFile))
       : rawFile
     if (!fileContents) return null
     const { data, content } = matter(fileContents)
@@ -387,22 +415,22 @@ export async function getDocTree() {
     let title = data.title
     if (!title) {
       const h1Match = content.match(/^# (.+)$/m)
-      if (h1Match) {
-        title = h1Match[1]
-      } else {
-        title = path.basename(fileName, path.extname(fileName)).replace(/-/g, " ")
-        title = title
-            .split(" ")
-            .map((word :string) => word.charAt(0).toUpperCase() + word.slice(1))
-            .join(" ")
-      }
+      title = h1Match ? h1Match[1] : path.basename(fileName, path.extname(fileName)).replace(/-/g, " ")
+        .split(" ")
+        .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ")
     }
 
     // Handle index files
     const isIndex = path.basename(fileName, path.extname(fileName)) === "index"
+    const fileNameWithoutExt = path.basename(fileName, path.extname(fileName))
+
+    const { number: hiddenNumber, rest: strippedName } = extractHiddenNumberAndRest(fileNameWithoutExt)
+
+    // URL 生成
     const urlPath = isIndex
-        ? pathParts.map(normalizePathForUrl).join("/")
-        : [...pathParts, path.basename(fileName, path.extname(fileName))].map(normalizePathForUrl).join("/")
+      ? pathParts.map(normalizePathForUrl).join("/")
+      : [...pathParts, strippedName].map(normalizePathForUrl).join("/")
 
     // Build tree structure
     let current = tree
@@ -423,13 +451,13 @@ export async function getDocTree() {
       current.isIndex = true
       current.url = "/" + urlPath
     } else {
-      const fileNameWithoutExt = path.basename(fileName, path.extname(fileName))
-      current.children[fileNameWithoutExt] = {
-        name: fileNameWithoutExt,
+      current.children[strippedName] = {
+        name: strippedName,
         title,
         url: "/" + urlPath,
-        path: [...(current.path || []), fileNameWithoutExt].map(normalizePathForUrl).join("/"),
+        path: [...(current.path || []), strippedName].map(normalizePathForUrl).join("/"),
         children: {},
+        hiddenNumber,
       }
     }
   }
@@ -463,13 +491,23 @@ export async function getDocTree() {
   function convertToArray(node: any) {
     if (node.children) {
       node.children = Object.values(node.children)
-          .map((child: any) => convertToArray(child))
-          .sort((a: any, b: any) => {
-            // Sort by whether it's an index file first, then by name
-            if (a.isIndex && !b.isIndex) return -1
-            if (!a.isIndex && b.isIndex) return 1
-            return a.name.localeCompare(b.name)
-          })
+        .map((child: any) => convertToArray(child))
+        .sort((a: any, b: any) => {
+          if (a.isIndex && !b.isIndex) return -1
+          if (!a.isIndex && b.isIndex) return 1
+
+          const aInfo = getNodeSortInfo(a)
+          const bInfo = getNodeSortInfo(b)
+
+          if (aInfo.number !== null && bInfo.number !== null) {
+            if (aInfo.number !== bInfo.number) return aInfo.number - bInfo.number
+          } else if (aInfo.number !== null) {
+            return -1
+          } else if (bInfo.number !== null) {
+            return 1
+          }
+          return aInfo.text.localeCompare(bInfo.text, undefined, { numeric: true, sensitivity: 'base' })
+        })
     }
     return node
   }
@@ -478,21 +516,33 @@ export async function getDocTree() {
 }
 
 // Get next and previous docs
+function collectUrls(node: any): string[] {
+  let urls: string[] = []
+  if (node.url) {
+    urls.push(node.url.slice(1))
+  }
+  if (node.children) {
+    for (const child of node.children) {
+      urls = urls.concat(collectUrls(child))
+    }
+  }
+  return urls
+}
+
 export async function getNextAndPrevDocs(slug: string) {
-  const allPaths = getAllDocPaths()
+  const treeChildren = await getDocTree()
+  let allPaths: string[] = []
+  for (const child of treeChildren) {
+    allPaths = allPaths.concat(collectUrls(child))
+  }
 
-  // Sort paths alphabetically to maintain consistent navigation
-  const sortedPaths = [...allPaths].sort((a, b) => {
-    // Handle root path specially
-    if (a === "") return -1
-    if (b === "") return 1
-    return a.localeCompare(b)
-  })
+  const currentIndex = allPaths.indexOf(slug)
+  if (currentIndex === -1) {
+    return {}
+  }
 
-  const currentIndex = sortedPaths.indexOf(slug)
-
-  const prev = currentIndex > 0 ? sortedPaths[currentIndex - 1] : null
-  const next = currentIndex < sortedPaths.length - 1 ? sortedPaths[currentIndex + 1] : null
+  const prev = currentIndex > 0 ? allPaths[currentIndex - 1] : null
+  const next = currentIndex < allPaths.length - 1 ? allPaths[currentIndex + 1] : null
 
   const result: { prev?: { slug: string; title: string }; next?: { slug: string; title: string } } = {}
 
