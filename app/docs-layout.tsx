@@ -210,18 +210,20 @@ export function DocsLayout({
         <div className="flex-1 text-left min-w-0">
           <HeadEllipsis className="font-medium" text={title} />
         </div>
-        {githubRepoEditUrl && (
-          <Link
-            href={githubRepoEditUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-muted-foreground hover:text-foreground"
-          >
-            <GithubIcon className="h-5 w-5" />
-            <span className="sr-only">Edit on GitHub</span>
-          </Link>
-        )}
-        <ThemeToggle />
+        <div className="flex items-center gap-2">
+          {githubRepoEditUrl && (
+            <Link
+              href={githubRepoEditUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-muted-foreground hover:text-foreground"
+            >
+              <GithubIcon className="h-5 w-5" />
+              <span className="sr-only">Edit on GitHub</span>
+            </Link>
+          )}
+          <ThemeToggle />
+        </div>
         <Sheet>
           <SheetTitle className="hidden" />
           <SheetTrigger asChild>
@@ -307,17 +309,19 @@ export function DocsLayout({
                     <h1 className="min-w-0 flex-1 wrap-break-word text-3xl font-bold tracking-tight">
                       {title}
                     </h1>
-                    {githubRepoEditUrl && (
-                      <Link
-                        href={githubRepoEditUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-muted-foreground m-4 hover:text-foreground"
-                      >
-                        <GithubIcon className="h-5 w-5" />
-                        <span className="sr-only">Edit on GitHub</span>
-                      </Link>
-                    )}
+                    <div className="flex items-center gap-2 m-4">
+                      {githubRepoEditUrl && (
+                        <Link
+                          href={githubRepoEditUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-muted-foreground hover:text-foreground"
+                        >
+                          <GithubIcon className="h-5 w-5" />
+                          <span className="sr-only">Edit on GitHub</span>
+                        </Link>
+                      )}
+                    </div>
                   </div>
                   <LastUpdated lastUpdated={lastUpdated} />
                 </div>
@@ -410,7 +414,9 @@ export function DocsLayout({
       {/* ── Mobile Content ── */}
       <div className="flex-1 lg:hidden">
         <div className="container py-6">
-          <DocsBreadcrumbs breadcrumbs={breadcrumbs} />
+          <div className="flex items-center justify-between mb-4">
+            <DocsBreadcrumbs breadcrumbs={breadcrumbs} />
+          </div>
           <LastUpdated lastUpdated={lastUpdated} />
           {summaryText && shouldExecuteSummary(summaryText) && articleId && (
             <AiSummary articleId={articleId} className="mt-4" />
