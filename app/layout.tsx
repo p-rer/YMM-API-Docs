@@ -30,7 +30,7 @@ export default function RootLayout({
     <body className={inter.className}>
     <NextTopLoader color="#4d54e3" />
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-      {children}
+      <main>{children}</main>
     </ThemeProvider>
     </body>
     </html>
