@@ -35,7 +35,8 @@ function replaceFootnoteBackrefSymbol(html: string): string {
 
 // Convert spaces to hyphens in URL paths
 function normalizePathForUrl(pathStr: string): string {
-  return pathStr.toLowerCase().replace(/\s+/g, "-")
+  if (pathStr === ".") return "";
+  return pathStr.toLowerCase().replace(/\s+/g, "-");
 }
 
 // Extract headings for table of contents (h2 and h3 elements)
