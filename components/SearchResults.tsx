@@ -8,7 +8,6 @@ import type { SearchResult } from "@/hooks/useFullTextSearch"
 
 interface SearchResultsProps {
   results: SearchResult[]
-  isIndexLoading: boolean
   isSearching: boolean
   query: string
   onClose: () => void
@@ -33,7 +32,6 @@ function highlight(text: string, query: string): React.ReactNode {
 
 export function SearchResults({
                                 results,
-                                isIndexLoading,
                                 isSearching,
                                 query,
                                 onClose,
@@ -57,9 +55,7 @@ export function SearchResults({
             </Button>
           )}
           <span className="text-sm text-muted-foreground">
-            {isIndexLoading
-              ? "検索インデックスを読み込み中…"
-              : isSearching
+            {isSearching
                 ? "検索中…"
                 : results.length > 0
                   ? `${results.length} 件`
