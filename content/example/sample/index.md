@@ -11,5 +11,3 @@
 
 - [映像エフェクト](video-effect)
 - [図形の追加](shape)
-- [ツールの追加](/guide/extension/ui_extension/itool/what-is-itool)
-- [設定の追加](/guide/extension/ui_extension/isettings/what-is-isettings)
