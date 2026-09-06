@@ -261,3 +261,59 @@
     }
   }
 }
+
+@layer base {
+  /* 共通スタイル */
+  .markdown-alert {
+    padding: 0.25rem 1rem;
+    margin-bottom: 1rem;
+    border-left-width: 2px;
+  }
+
+  .markdown-alert .markdown-alert-title {
+    display: flex;
+    align-items: center;
+    font-weight: 600;
+    margin-bottom: 0.1rem;
+  }
+
+  .markdown-alert.markdown-alert-note {
+    border-left-color: #3b82f6; /* blue-500 */
+    background-color: rgba(59, 130, 246, 0.1);
+  }
+  .markdown-alert.markdown-alert-note .markdown-alert-title {
+    color: #3b82f6;
+  }
+
+  .markdown-alert.markdown-alert-tip {
+    border-left-color: #22c55e; /* green-500 */
+    background-color: rgba(34, 197, 94, 0.1);
+  }
+  .markdown-alert.markdown-alert-tip .markdown-alert-title {
+    color: #22c55e;
+  }
+
+  .markdown-alert.markdown-alert-important {
+    border-left-color: #a855f7; /* purple-500 */
+    background-color: rgba(168, 85, 247, 0.1);
+  }
+  .markdown-alert.markdown-alert-important .markdown-alert-title {
+    color: #a855f7;
+  }
+
+  .markdown-alert.markdown-alert-warning {
+    border-left-color: #eab308; /* yellow-500 */
+    background-color: rgba(234, 179, 8, 0.1);
+  }
+  .markdown-alert.markdown-alert-warning .markdown-alert-title {
+    color: #eab308;
+  }
+
+  .markdown-alert.markdown-alert-caution {
+    border-left-color: #ef4444; /* red-500 */
+    background-color: rgba(239, 68, 68, 0.1);
+  }
+  .markdown-alert.markdown-alert-caution .markdown-alert-title {
+    color: #ef4444;
+  }
+}

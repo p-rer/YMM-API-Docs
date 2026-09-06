@@ -4,6 +4,7 @@ import path from "path"
 import matter from "gray-matter"
 import { remark } from "remark"
 import remarkGfm from "remark-gfm"
+import remarkGithubAlerts from 'remark-github-alerts';
 import remarkParse from "remark-parse"
 import remarkRehype from "remark-rehype"
 import remarkMath from 'remark-math'
@@ -187,6 +188,7 @@ export async function getDocBySlug(slug: string, isHome = false) {
         .use(remarkResolveContentImages(fullPath))
         .use(remarkMath)
         .use(remarkGfm)
+        .use(remarkGithubAlerts)
         .use(remarkEnsureFootnoteSeparator)
         .use(remarkWrapHeadings)
         .use(remarkRehype, { allowDangerousHtml: true })
@@ -393,7 +395,7 @@ export async function getDocBySlug(slug: string, isHome = false) {
 // Get document tree for navigation (including YAML files)
 export async function getDocTree() {
   const files = getAllFiles(DOCS_DIRECTORY)
-  const tree: any = { children: {} }
+  const tree: any = { children: {}, fsPath: '', strippedName: '' }
 
   for (const file of files) {
     const relativePath = path.relative(DOCS_DIRECTORY, file)
@@ -437,9 +439,13 @@ export async function getDocTree() {
     let current = tree
     for (const part of pathParts) {
       if (!current.children[part]) {
+        const { number: partNumber, rest: strippedPart } = extractHiddenNumberAndRest(part)
         current.children[part] = {
           name: part,
+          strippedName: strippedPart,
+          hiddenNumber: partNumber,
           path: [...(current.path || []), part].map(normalizePathForUrl).join("/"),
+          fsPath: path.join(current.fsPath || '', part),
           children: {},
         }
       }
@@ -454,61 +460,116 @@ export async function getDocTree() {
     } else {
       current.children[strippedName] = {
         name: strippedName,
+        strippedName: strippedName,
         title,
         url: "/" + urlPath,
         path: [...(current.path || []), strippedName].map(normalizePathForUrl).join("/"),
+        fsPath: path.join(current.fsPath || '', fileName),
         children: {},
         hiddenNumber,
       }
     }
   }
 
-  function applyNameFiles(node: any, currentPath: string[] = []) {
+  function applyNameFiles(node: any) {
     if (node.children) {
+      const nameFilePath = path.join(DOCS_DIRECTORY, node.fsPath || '', ".name")
+      if (fs.existsSync(nameFilePath)) {
+        try {
+          const nameContent = fs.readFileSync(nameFilePath, "utf8").trim()
+          if (nameContent) node.title = nameContent
+        } catch (e) { /* ignore */ }
+      }
       for (const key in node.children) {
-        const child = node.children[key]
-        const childPath = [...currentPath, child.name]
-
-        if (!child.title) {
-          const nameFilePath = path.join(DOCS_DIRECTORY, ...childPath, ".name")
-          if (fs.existsSync(nameFilePath)) {
-            try {
-              child.title = fs.readFileSync(nameFilePath, "utf8").trim()
-            } catch (error) {
-              console.warn(`Error reading .name file ${nameFilePath}:`, error)
-            }
-          }
-        }
-
-        applyNameFiles(child, childPath)
+        applyNameFiles(node.children[key])
       }
     }
-    return node
+  }
+
+  function applyOrderFiles(node: any) {
+    if (node.children) {
+      const orderFilePath = path.join(DOCS_DIRECTORY, node.fsPath || '', ".order")
+      let orderValue: string | null = null
+      if (fs.existsSync(orderFilePath)) {
+        try {
+          const content = fs.readFileSync(orderFilePath, "utf8")
+          const lines = content.split('\n').map(line => line.trim()).filter(line => line.length > 0)
+          if (lines.length > 0) {
+            orderValue = lines[0]
+          }
+        } catch (e) {
+          // ignore
+        }
+      }
+      node.orderValue = orderValue
+      for (const key in node.children) {
+        applyOrderFiles(node.children[key])
+      }
+    }
   }
 
   applyNameFiles(tree)
+  applyOrderFiles(tree)
 
   // Convert children objects to arrays for easier rendering
+  function getOrderGroupAndKey(orderValue: string | null): { group: number; sortKey: number | null } {
+    if (orderValue === 'start') {
+      return { group: 0, sortKey: null }
+    } else if (orderValue === 'end') {
+      return { group: 2, sortKey: null }
+    } else if (orderValue !== null && /^\d+$/.test(orderValue)) {
+      return { group: 1, sortKey: parseInt(orderValue, 10) }
+    } else {
+      return { group: 1, sortKey: null }
+    }
+  }
+
+  function defaultCompare(a: any, b: any): number {
+    if (a.isIndex && !b.isIndex) return -1
+    if (!a.isIndex && b.isIndex) return 1
+    const aInfo = getNodeSortInfo(a)
+    const bInfo = getNodeSortInfo(b)
+    if (aInfo.number !== null && bInfo.number !== null) {
+      if (aInfo.number !== bInfo.number) return aInfo.number - bInfo.number
+    } else if (aInfo.number !== null) {
+      return -1
+    } else if (bInfo.number !== null) {
+      return 1
+    }
+    return aInfo.text.localeCompare(bInfo.text, undefined, { numeric: true, sensitivity: 'base' })
+  }
   function convertToArray(node: any) {
     if (node.children) {
-      node.children = Object.values(node.children)
-        .map((child: any) => convertToArray(child))
-        .sort((a: any, b: any) => {
-          if (a.isIndex && !b.isIndex) return -1
-          if (!a.isIndex && b.isIndex) return 1
+      const childArray = Object.values(node.children).map((child: any) => convertToArray(child))
 
-          const aInfo = getNodeSortInfo(a)
-          const bInfo = getNodeSortInfo(b)
+      childArray.sort((a: any, b: any) => {
+        const aOrder = getOrderGroupAndKey(a.orderValue)
+        const bOrder = getOrderGroupAndKey(b.orderValue)
 
-          if (aInfo.number !== null && bInfo.number !== null) {
-            if (aInfo.number !== bInfo.number) return aInfo.number - bInfo.number
-          } else if (aInfo.number !== null) {
+        if (aOrder.group !== bOrder.group) {
+          return aOrder.group - bOrder.group
+        }
+
+        if (aOrder.group === 0 || aOrder.group === 2) {
+          return defaultCompare(a, b)
+        } else {
+          if (aOrder.sortKey !== null && bOrder.sortKey !== null) {
+            if (aOrder.sortKey !== bOrder.sortKey) {
+              return aOrder.sortKey - bOrder.sortKey
+            } else {
+              return defaultCompare(a, b)
+            }
+          } else if (aOrder.sortKey !== null) {
             return -1
-          } else if (bInfo.number !== null) {
+          } else if (bOrder.sortKey !== null) {
             return 1
+          } else {
+            return defaultCompare(a, b)
           }
-          return aInfo.text.localeCompare(bInfo.text, undefined, { numeric: true, sensitivity: 'base' })
-        })
+        }
+      })
+
+      node.children = childArray
     }
     return node
   }
