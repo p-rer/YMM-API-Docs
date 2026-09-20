@@ -23,6 +23,7 @@ import { yamlToMarkdown } from "./yaml-docs"
 import {isApiDocument, renderApiDocToMarkdown} from "@/lib/api-docs/render-api-doc";
 import remarkResolveContentImages from "./remarkResolveContentImages"
 import { readDocFileAsMarkdown, resolveDocPath } from "./doc-markdown"
+import { resolveDocContributors } from "./doc-contributors"
 import {rehypeCustomizeFootnotes} from "@/lib/reshypeCustomizeFootnotes";
 import {remarkEnsureFootnoteSeparator} from "@/lib/remarkEnsureFootnoteSeparator";
 
@@ -284,6 +285,9 @@ export async function getDocBySlug(slug: string, isHome = false) {
       lastUpdated = stats.mtime
     }
 
+    // Authors / editors (frontmatter first, then Git history, then GitHub API)
+    const contributors = await resolveDocContributors(fullPath, data)
+
     // Get relative path for breadcrumbs
     const relativePath = path.relative(DOCS_DIRECTORY, fullPath)
     const pathParts = relativePath.replace(/\.(md|yaml|yml)$/, "").split(path.sep)
@@ -380,6 +384,7 @@ export async function getDocBySlug(slug: string, isHome = false) {
       markdown: content,
       toc,
       lastUpdated,
+      contributors,
       breadcrumbs,
       frontmatter: data,
       githubEditUrl: IS_GITHUB_REPO_EDITABLE
