@@ -1,3 +1,7 @@
+---
+ignoreMetadata: true
+---
+
 # プラグインサンプル集解説
 
 [サンプルリポジトリ](https://github.com/manju-summoner/YukkuriMovieMaker4PluginSamples)の解説

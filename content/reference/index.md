@@ -1,3 +1,7 @@
+---
+ignoreMetadata: true
+---
+
 # リファレンス
 
 ## 名前空間

@@ -102,6 +102,7 @@ export default async function DocPage({ params }: Props) {
           toc={Array.isArray(doc.toc) ? doc.toc : []}
           title={doc.title}
           lastUpdated={doc.lastUpdated}
+          contributors={doc.contributors}
           breadcrumbs={doc.breadcrumbs}
           githubRepoEditUrl={doc.githubEditUrl}
           prevNext={prevNext}

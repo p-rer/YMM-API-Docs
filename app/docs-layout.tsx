@@ -12,6 +12,7 @@ import { ThemeToggle } from "@/components/theme-toggle"
 
 import { DocsBreadcrumbs } from "@/components/DocsBreadcrumbs"
 import { LastUpdated } from "@/components/LastUpdated"
+import { DocContributorsList } from "@/components/DocContributorsList"
 import { PrevNextNav } from "@/components/PrevNextNav"
 import { SearchBox } from "@/components/SearchBox"
 import { DocTree } from "@/components/DocTree"
@@ -27,6 +28,7 @@ import { useIsTocItemActive } from "@/hooks/useIsTocItemActive"
 import { useTocIndicatorStyle } from "@/hooks/useTocIndicatorStyle"
 import { SITE_TITLE } from "@/lib/siteSetting"
 import { cn } from "@/lib/utils"
+import type { DocContributors } from "@/lib/doc-contributors"
 import { shouldExecuteSummary } from "@/lib/summary"
 import { HeadEllipsis } from "@/components/HeadEllipsis"
 import {useIsMobile} from "@/hooks/use-mobile";
@@ -52,6 +54,7 @@ interface DocsLayoutProps {
   toc: TocItem[]
   title: string
   lastUpdated: Date
+  contributors?: DocContributors | null
   breadcrumbs: { label: string; href: string | null }[]
   githubRepoEditUrl: string | null
   prevNext?: {
@@ -68,6 +71,7 @@ export function DocsLayout({
                              toc,
                              title,
                              lastUpdated,
+                             contributors,
                              breadcrumbs,
                              githubRepoEditUrl,
                              prevNext,
@@ -323,6 +327,7 @@ export function DocsLayout({
                     </div>
                   </div>
                   <LastUpdated lastUpdated={lastUpdated} />
+                  <DocContributorsList contributors={contributors} />
                 </div>
                 {summaryText && shouldExecuteSummary(summaryText) && articleId && (
                   <AiSummary articleId={articleId} />
@@ -416,6 +421,7 @@ export function DocsLayout({
             <DocsBreadcrumbs breadcrumbs={breadcrumbs} />
           </div>
           <LastUpdated lastUpdated={lastUpdated} />
+          <DocContributorsList contributors={contributors} />
           {summaryText && shouldExecuteSummary(summaryText) && articleId && (
             <AiSummary articleId={articleId} className="mt-4" />
           )}
