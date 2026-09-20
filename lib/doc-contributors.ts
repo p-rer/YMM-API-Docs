@@ -118,6 +118,22 @@ async function githubApi<T>(pathAndQuery: string): Promise<T | null> {
   }
 }
 
+const githubProfileNames = new Map<string, Promise<string | null>>()
+
+function lookupGithubProfileName(login: string): Promise<string | null> {
+  const key = login.toLowerCase()
+  let result = githubProfileNames.get(key)
+
+  if (!result) {
+    result = githubApi<{ name: string | null }>(`/users/${encodeURIComponent(login)}`)
+      .then((profile) => profile?.name?.trim() || null)
+
+    githubProfileNames.set(key, result)
+  }
+
+  return result
+}
+
 const REPO_API = `/repos/${GITHUB_REPO_USERNAME}/${GITHUB_REPO_NAME}`
 const loginByEmail = new Map<string, Promise<string | null>>()
 
@@ -198,7 +214,9 @@ async function loadGitPeople(fullPath: string): Promise<DocPerson[]> {
     if (!id.name || isBot(id)) continue
     let login = id.login ?? resolveMappedLogin(id.name, id.email) ?? (await resolveNoreplyLogin(id.email))
     if (!login && fromGit && id.email) login = await lookupLoginByCommit(id.email, id.sha)
-    entries.push({ name: id.name, email: id.email, login })
+    const githubName = login ? await lookupGithubProfileName(login) : null
+    entries.push({name: githubName ?? id.name, email: id.email, login,
+    })
   }
 
   const parent = entries.map((_, i) => i)

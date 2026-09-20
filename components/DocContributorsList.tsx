@@ -3,44 +3,19 @@ import Link from "next/link"
 import type { DocContributors, DocPerson } from "@/lib/doc-contributors"
 import { cn } from "@/lib/utils"
 
-async function Person({ person }: { person: DocPerson }) {
+function Person({ person }: { person: DocPerson }) {
   if (!person.github) return <span>{person.name}</span>
 
-  let displayName = person.name
-
-  try {
-    const res = await fetch(`https://api.github.com/users/${person.github}`, {
-  headers: {
-    Accept: "application/vnd.github+json",
-      "User-Agent": "YMM-API-Docs",
-  },
-next: {
-  revalidate: 3600,
-},
-})
-
-if (res.ok) {
-  const profile = (await res.json()) as {
-    name: string | null
-    login: string
-  }
-
-  displayName = profile.name?.trim() || profile.login
-}
-} catch {
-  // GitHub API が利用できない場合は既存の表示名を使用する
-}
-
-return (
-  <Link
-    href={`https://github.com/${person.github}`}
-    target="_blank"
-    rel="noopener noreferrer"
-    className="hover:text-foreground hover:underline"
-  >
-    {displayName}
-  </Link>
-)
+  return (
+    <Link
+      href={`https://github.com/${person.github}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="hover:text-foreground hover:underline"
+    >
+      {person.name}
+    </Link>
+  )
 }
 
 export function DocContributorsList({contributors, className}: {
