@@ -167,7 +167,20 @@ function getAllFiles(dir: string): string[] {
 }
 
 // Get doc content by slug (with YAML support)
-export async function getDocBySlug(slug: string, isHome = false) {
+const docCache = new Map<string, Promise<Awaited<ReturnType<typeof getDocBySlugUncached>>>>()
+
+export function getDocBySlug(slug: string, isHome = false) {
+  if (process.env.NODE_ENV === "development") return getDocBySlugUncached(slug, isHome)
+  const key = `${isHome}:${slug}`
+  let doc = docCache.get(key)
+  if (!doc) {
+    doc = getDocBySlugUncached(slug, isHome)
+    docCache.set(key, doc)
+  }
+  return doc
+}
+
+async function getDocBySlugUncached(slug: string, isHome = false) {
   const fullPath = resolveDocPath(slug, isHome)
 
   if (!fullPath) {
@@ -398,7 +411,15 @@ export async function getDocBySlug(slug: string, isHome = false) {
 }
 
 // Get document tree for navigation (including YAML files)
-export async function getDocTree() {
+let docTreePromise: Promise<any> | undefined
+
+export function getDocTree() {
+  if (process.env.NODE_ENV === "development") return getDocTreeUncached()
+  docTreePromise ??= getDocTreeUncached()
+  return docTreePromise
+}
+
+async function getDocTreeUncached() {
   const files = getAllFiles(DOCS_DIRECTORY)
   const tree: any = { children: {}, fsPath: '', strippedName: '' }
 
