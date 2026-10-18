@@ -93,7 +93,7 @@
     "remark-parse": "latest",
     "remark-rehype": "latest",
     "satori": "^0.12.2",
-    "sharp": "^0.35.4",
+    "sharp": "^0.35.5",
     "sonner": "^1.7.4",
     "tailwind-merge": "^2.6.1",
     "tailwindcss": "^4.3.3",
@@ -112,7 +112,7 @@
     "concurrently": "^10.0.5",
     "eslint": "^9.39.5",
     "eslint-config-next": "^15.5.26",
-    "postcss": "^8.5.29",
+    "postcss": "^8.5.30",
     "shiki": "^3.23.0",
     "tsx": "^4.23.15",
     "typescript": "^5.9.3"
