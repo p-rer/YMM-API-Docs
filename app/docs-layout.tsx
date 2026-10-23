@@ -32,6 +32,7 @@ import type { DocContributors } from "@/lib/doc-contributors"
 import { shouldExecuteSummary } from "@/lib/summary"
 import { HeadEllipsis } from "@/components/HeadEllipsis"
 import {useIsMobile} from "@/hooks/use-mobile";
+import { InternalLinkPreview } from "@/components/InternalLinkPreview"
 
 interface DocTreeNode {
   name: string
@@ -332,7 +333,7 @@ export function DocsLayout({
                 {summaryText && shouldExecuteSummary(summaryText) && articleId && (
                   <AiSummary articleId={articleId} />
                 )}
-                <div className="prose prose-slate dark:prose-invert max-w-none">
+                <div className="prose prose-slate dark:prose-invert max-w-none" data-doc-content>
                   {children}
                 </div>
                 <CodeCopyButtons />
@@ -425,7 +426,7 @@ export function DocsLayout({
           {summaryText && shouldExecuteSummary(summaryText) && articleId && (
             <AiSummary articleId={articleId} className="mt-4" />
           )}
-          <div className="prose prose-slate dark:prose-invert max-w-none wrap-break-word">
+          <div className="prose prose-slate dark:prose-invert max-w-none wrap-break-word" data-doc-content>
             {children}
           </div>
           <CodeCopyButtons />
@@ -433,6 +434,7 @@ export function DocsLayout({
         </div>
       </div>
       <CodeCopyButtons />
+      <InternalLinkPreview />
     </div>
   )
 }
