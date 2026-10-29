@@ -162,7 +162,7 @@ export function InternalLinkPreview() {
   return createPortal(
     <div
       data-internal-link-preview
-      className="prose prose-sm dark:prose-invert fixed z-50 max-h-[min(70vh,26.25rem)] w-[min(28rem,calc(100vw-1rem))] overflow-y-auto overscroll-contain rounded-md border bg-popover p-4 text-popover-foreground shadow-lg"
+      className="prose prose-sm dark:prose-invert fixed z-50 max-h-[min(70vh,26.25rem)] w-[min(28rem,calc(100vw-1rem))] overflow-x-hidden overflow-y-auto overscroll-contain rounded-md border bg-popover p-4 text-popover-foreground shadow-lg [&_a]:pointer-events-none [&_a]:cursor-text"
       style={{ left: preview.left, top: preview.top }}
       onPointerEnter={() => {
         if (hideTimer.current !== undefined) {
