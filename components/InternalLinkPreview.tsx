@@ -9,7 +9,7 @@ type Preview = {
   top: number
 }
 
-const HIDE_DELAY = 300
+const HIDE_DELAY = 250
 const PREVIEW_WIDTH = 352
 const PREVIEW_HEIGHT = 232
 const VIEWPORT_PADDING = 8
@@ -38,50 +38,115 @@ export function InternalLinkPreview() {
 
   useEffect(() => {
     const cancelHide = () => {
-      if (hideTimer.current) clearTimeout(hideTimer.current)
+      if (hideTimer.current !== undefined) {
+        clearTimeout(hideTimer.current)
+        hideTimer.current = undefined
+      }
     }
-    const hide = () => {
+
+    const clearPreview = () => {
       cancelHide()
       requestId.current += 1
+      anchorRef.current = null
+      setPreview(null)
+    }
+
+    const hide = () => {
+      cancelHide()
       hideTimer.current = setTimeout(() => {
+        hideTimer.current = undefined
         anchorRef.current = null
+        requestId.current += 1
         setPreview(null)
       }, HIDE_DELAY)
     }
+
     const updatePosition = () => {
-      if (!anchorRef.current) return
-      setPreview(current => current && { ...current, ...getPreviewPosition(anchorRef.current!) })
+      const anchor = anchorRef.current
+      if (!anchor || !anchor.isConnected) {
+        clearPreview()
+        return
+      }
+      setPreview(current => current ? { ...current, ...getPreviewPosition(anchor) } : null)
     }
+
     const isPreviewable = (anchor: HTMLAnchorElement) => {
-      const url = new URL(anchor.href)
-      return url.origin === window.location.origin && url.pathname !== window.location.pathname && !anchor.hasAttribute("download")
+      if (!anchor.hasAttribute("href") || anchor.hasAttribute("download")) return false
+
+      try {
+        const url = new URL(anchor.href, window.location.href)
+        return (
+          (url.protocol === "http:" || url.protocol === "https:") &&
+          url.origin === window.location.origin &&
+          url.pathname !== window.location.pathname
+        )
+      } catch {
+        return false
+      }
     }
+
     const show = async (anchor: HTMLAnchorElement) => {
-      if (!isPreviewable(anchor)) return
       cancelHide()
+
+      if (!isPreviewable(anchor)) {
+        clearPreview()
+        return
+      }
+
       if (anchorRef.current === anchor) return
+
       anchorRef.current = anchor
       const id = ++requestId.current
-      const response = await fetch(`/api/doc-preview?href=${encodeURIComponent(anchor.href)}`)
-      const { html } = await response.json()
-      if (id !== requestId.current || !html) return
-      setPreview({ html, ...getPreviewPosition(anchor) })
+      setPreview(null)
+
+      try {
+        const response = await fetch(
+          `/api/doc-preview?href=${encodeURIComponent(anchor.href)}`,
+          { headers: { Accept: "application/json" } },
+        )
+        if (!response.ok) return
+
+        const data: { html?: unknown } = await response.json()
+        if (
+          id !== requestId.current ||
+          anchorRef.current !== anchor ||
+          !anchor.isConnected ||
+          typeof data.html !== "string" ||
+          !data.html.trim()
+        ) {
+          return
+        }
+
+        setPreview({ html: data.html, ...getPreviewPosition(anchor) })
+      } catch {
+        // A preview failure must not interfere with normal link navigation.
+      }
     }
+
     const onPointerOver = (event: PointerEvent) => {
-      const anchor = (event.target as Element).closest<HTMLAnchorElement>("[data-doc-content] a")
+      if (event.pointerType !== "mouse" || !(event.target instanceof Element)) return
+      const anchor = event.target.closest<HTMLAnchorElement>("[data-doc-content] a[href]")
       if (anchor) void show(anchor)
     }
+
     const onPointerOut = (event: PointerEvent) => {
-      const anchor = (event.target as Element).closest<HTMLAnchorElement>("[data-doc-content] a")
-      if (anchor && !anchor.contains(event.relatedTarget as Node | null)) hide()
+      if (event.pointerType !== "mouse" || !(event.target instanceof Element)) return
+      const anchor = event.target.closest<HTMLAnchorElement>("[data-doc-content] a[href]")
+      if (!anchor || anchor.contains(event.relatedTarget as Node | null)) return
+
+      // Keep the preview open while the pointer moves from its source link into the card.
+      if (event.relatedTarget instanceof Element && event.relatedTarget.closest("[data-internal-link-preview]")) return
+      hide()
     }
 
     document.addEventListener("pointerover", onPointerOver)
     document.addEventListener("pointerout", onPointerOut)
     window.addEventListener("scroll", updatePosition, true)
     window.addEventListener("resize", updatePosition)
+
     return () => {
       cancelHide()
+      requestId.current += 1
       document.removeEventListener("pointerover", onPointerOver)
       document.removeEventListener("pointerout", onPointerOut)
       window.removeEventListener("scroll", updatePosition, true)
@@ -93,12 +158,20 @@ export function InternalLinkPreview() {
 
   return createPortal(
     <div
+      data-internal-link-preview
       className="prose prose-sm dark:prose-invert fixed z-50 max-h-[14.5rem] w-[22rem] overflow-hidden rounded-md border bg-popover p-4 text-popover-foreground shadow-lg"
       style={{ left: preview.left, top: preview.top }}
-      onPointerEnter={() => hideTimer.current && clearTimeout(hideTimer.current)}
+      onPointerEnter={() => {
+        if (hideTimer.current !== undefined) {
+          clearTimeout(hideTimer.current)
+          hideTimer.current = undefined
+        }
+      }}
       onPointerLeave={() => {
-        requestId.current += 1
+        if (hideTimer.current !== undefined) clearTimeout(hideTimer.current)
         hideTimer.current = setTimeout(() => {
+          hideTimer.current = undefined
+          requestId.current += 1
           anchorRef.current = null
           setPreview(null)
         }, HIDE_DELAY)
