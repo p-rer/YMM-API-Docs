@@ -139,7 +139,8 @@ export function InternalLinkPreview() {
     }
 
     const onPointerOver = (event: PointerEvent) => {
-      if (event.pointerType !== "mouse" || !(event.target instanceof Element)) return
+      // Ignore touch and compatibility pointer events synthesized from touch input.
+      if (event.pointerType !== "mouse" || event.sourceCapabilities?.firesTouchEvents || !(event.target instanceof Element)) return
       const anchor = event.target.closest<HTMLAnchorElement>("[data-doc-content] a[href]")
       if (!anchor) return
       if (anchorRef.current === anchor || pendingAnchorRef.current === anchor) return
@@ -157,7 +158,7 @@ export function InternalLinkPreview() {
     }
 
     const onPointerOut = (event: PointerEvent) => {
-      if (event.pointerType !== "mouse" || !(event.target instanceof Element)) return
+      if (event.pointerType !== "mouse" || event.sourceCapabilities?.firesTouchEvents || !(event.target instanceof Element)) return
       const anchor = event.target.closest<HTMLAnchorElement>("[data-doc-content] a[href]")
       if (!anchor || anchor.contains(event.relatedTarget as Node | null)) return
       if (pendingAnchorRef.current === anchor) cancelShow()
@@ -167,8 +168,11 @@ export function InternalLinkPreview() {
       hide()
     }
 
+    const onTouchStart = () => clearPreview()
+
     document.addEventListener("pointerover", onPointerOver)
     document.addEventListener("pointerout", onPointerOut)
+    document.addEventListener("touchstart", onTouchStart, { passive: true })
     window.addEventListener("scroll", updatePosition, true)
     window.addEventListener("resize", updatePosition)
 
@@ -178,6 +182,7 @@ export function InternalLinkPreview() {
       requestId.current += 1
       document.removeEventListener("pointerover", onPointerOver)
       document.removeEventListener("pointerout", onPointerOut)
+      document.removeEventListener("touchstart", onTouchStart)
       window.removeEventListener("scroll", updatePosition, true)
       window.removeEventListener("resize", updatePosition)
     }
