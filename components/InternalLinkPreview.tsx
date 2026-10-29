@@ -100,9 +100,12 @@ export function InternalLinkPreview() {
       setPreview(null)
 
       try {
+        // Resolve same-origin redirects (including API reference aliases) before
+        // requesting the preview for the final document URL.
+        const targetUrl = new URL(anchor.href, window.location.href)
         const response = await fetch(
-          `/api/doc-preview?href=${encodeURIComponent(anchor.href)}`,
-          { headers: { Accept: "application/json" } },
+          `/api/doc-preview?href=${encodeURIComponent(targetUrl.href)}`,
+          { headers: { Accept: "application/json" }, redirect: "follow" },
         )
         if (!response.ok) return
 
