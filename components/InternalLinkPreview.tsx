@@ -11,7 +11,7 @@ type Preview = {
 
 const HIDE_DELAY = 250
 const PREVIEW_WIDTH = 352
-const PREVIEW_HEIGHT = 232
+const PREVIEW_HEIGHT = 420
 const VIEWPORT_PADDING = 8
 const PREVIEW_GAP = 8
 
@@ -162,7 +162,7 @@ export function InternalLinkPreview() {
   return createPortal(
     <div
       data-internal-link-preview
-      className="prose prose-sm dark:prose-invert fixed z-50 max-h-[14.5rem] w-[22rem] overflow-hidden rounded-md border bg-popover p-4 text-popover-foreground shadow-lg"
+      className="prose prose-sm dark:prose-invert fixed z-50 max-h-[min(70vh,26.25rem)] w-[min(28rem,calc(100vw-1rem))] overflow-y-auto overscroll-contain rounded-md border bg-popover p-4 text-popover-foreground shadow-lg"
       style={{ left: preview.left, top: preview.top }}
       onPointerEnter={() => {
         if (hideTimer.current !== undefined) {
