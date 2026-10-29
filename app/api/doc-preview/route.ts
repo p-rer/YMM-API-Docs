@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
   if (url.origin !== request.nextUrl.origin) return NextResponse.json({ html: null })
 
   const resolvedPath = resolveInternalRedirect(url.pathname)
-  const slug = decodeURIComponent(resolvedPath).replace(/^\\/+|\\/+$/g, "")
+  const slug = decodeURIComponent(resolvedPath).replace(/^\/+|\/+$/g, "")
   const markdown = getDocMarkdownBySlug(slug, slug === "")
   if (!markdown) return NextResponse.json({ html: null })
 
