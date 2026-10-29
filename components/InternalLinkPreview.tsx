@@ -10,7 +10,7 @@ type Preview = {
 }
 
 const HIDE_DELAY = 250
-const PREVIEW_WIDTH = 352
+const PREVIEW_WIDTH = 448
 const PREVIEW_HEIGHT = 420
 const VIEWPORT_PADDING = 8
 const PREVIEW_GAP = 8
