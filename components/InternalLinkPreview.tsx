@@ -9,6 +9,7 @@ type Preview = {
   top: number
 }
 
+const SHOW_DELAY = 1000
 const HIDE_DELAY = 250
 const PREVIEW_WIDTH = 448
 const PREVIEW_HEIGHT = 420
@@ -32,11 +33,21 @@ function getPreviewPosition(anchor: HTMLAnchorElement) {
 
 export function InternalLinkPreview() {
   const [preview, setPreview] = useState<Preview | null>(null)
+  const showTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  const pendingAnchorRef = useRef<HTMLAnchorElement | null>(null)
   const hideTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   const requestId = useRef(0)
   const anchorRef = useRef<HTMLAnchorElement | null>(null)
 
   useEffect(() => {
+    const cancelShow = () => {
+      if (showTimer.current !== undefined) {
+        clearTimeout(showTimer.current)
+        showTimer.current = undefined
+      }
+      pendingAnchorRef.current = null
+    }
+
     const cancelHide = () => {
       if (hideTimer.current !== undefined) {
         clearTimeout(hideTimer.current)
@@ -45,6 +56,7 @@ export function InternalLinkPreview() {
     }
 
     const clearPreview = () => {
+      cancelShow()
       cancelHide()
       requestId.current += 1
       anchorRef.current = null
@@ -129,13 +141,26 @@ export function InternalLinkPreview() {
     const onPointerOver = (event: PointerEvent) => {
       if (event.pointerType !== "mouse" || !(event.target instanceof Element)) return
       const anchor = event.target.closest<HTMLAnchorElement>("[data-doc-content] a[href]")
-      if (anchor) void show(anchor)
+      if (!anchor) return
+      if (anchorRef.current === anchor || pendingAnchorRef.current === anchor) return
+      cancelShow()
+      if (!isPreviewable(anchor)) {
+        clearPreview()
+        return
+      }
+      pendingAnchorRef.current = anchor
+      showTimer.current = setTimeout(() => {
+        showTimer.current = undefined
+        pendingAnchorRef.current = null
+        void show(anchor)
+      }, SHOW_DELAY)
     }
 
     const onPointerOut = (event: PointerEvent) => {
       if (event.pointerType !== "mouse" || !(event.target instanceof Element)) return
       const anchor = event.target.closest<HTMLAnchorElement>("[data-doc-content] a[href]")
       if (!anchor || anchor.contains(event.relatedTarget as Node | null)) return
+      if (pendingAnchorRef.current === anchor) cancelShow()
 
       // Keep the preview open while the pointer moves from its source link into the card.
       if (event.relatedTarget instanceof Element && event.relatedTarget.closest("[data-internal-link-preview]")) return
@@ -148,6 +173,7 @@ export function InternalLinkPreview() {
     window.addEventListener("resize", updatePosition)
 
     return () => {
+      cancelShow()
       cancelHide()
       requestId.current += 1
       document.removeEventListener("pointerover", onPointerOver)
