@@ -40,6 +40,9 @@ export function InternalLinkPreview() {
   const anchorRef = useRef<HTMLAnchorElement | null>(null)
 
   useEffect(() => {
+    let lastTouchAt = Number.NEGATIVE_INFINITY
+    const mouseHoverQuery = window.matchMedia("(any-hover: hover) and (any-pointer: fine)")
+
     const cancelShow = () => {
       if (showTimer.current !== undefined) {
         clearTimeout(showTimer.current)
@@ -138,9 +141,14 @@ export function InternalLinkPreview() {
       }
     }
 
+    const isGenuineMousePointer = (event: PointerEvent) =>
+      event.pointerType === "mouse" &&
+      !event.sourceCapabilities?.firesTouchEvents &&
+      event.timeStamp - lastTouchAt > 1000 &&
+      mouseHoverQuery.matches
+
     const onPointerOver = (event: PointerEvent) => {
-      // Ignore touch and compatibility pointer events synthesized from touch input.
-      if (event.pointerType !== "mouse" || event.sourceCapabilities?.firesTouchEvents || !(event.target instanceof Element)) return
+      if (!isGenuineMousePointer(event) || !(event.target instanceof Element)) return
       const anchor = event.target.closest<HTMLAnchorElement>("[data-doc-content] a[href]")
       if (!anchor) return
       if (anchorRef.current === anchor || pendingAnchorRef.current === anchor) return
@@ -158,7 +166,7 @@ export function InternalLinkPreview() {
     }
 
     const onPointerOut = (event: PointerEvent) => {
-      if (event.pointerType !== "mouse" || event.sourceCapabilities?.firesTouchEvents || !(event.target instanceof Element)) return
+      if (!isGenuineMousePointer(event) || !(event.target instanceof Element)) return
       const anchor = event.target.closest<HTMLAnchorElement>("[data-doc-content] a[href]")
       if (!anchor || anchor.contains(event.relatedTarget as Node | null)) return
       if (pendingAnchorRef.current === anchor) cancelShow()
@@ -168,11 +176,20 @@ export function InternalLinkPreview() {
       hide()
     }
 
-    const onTouchStart = () => clearPreview()
+    const onTouchStart = () => {
+      lastTouchAt = performance.now()
+      clearPreview()
+    }
+    const onFocusIn = () => clearPreview()
+    const onNonMousePointerDown = (event: PointerEvent) => {
+      if (event.pointerType !== "mouse") clearPreview()
+    }
 
     document.addEventListener("pointerover", onPointerOver)
     document.addEventListener("pointerout", onPointerOut)
     document.addEventListener("touchstart", onTouchStart, { passive: true })
+    document.addEventListener("focusin", onFocusIn)
+    document.addEventListener("pointerdown", onNonMousePointerDown)
     window.addEventListener("scroll", updatePosition, true)
     window.addEventListener("resize", updatePosition)
 
@@ -183,6 +200,8 @@ export function InternalLinkPreview() {
       document.removeEventListener("pointerover", onPointerOver)
       document.removeEventListener("pointerout", onPointerOut)
       document.removeEventListener("touchstart", onTouchStart)
+      document.removeEventListener("focusin", onFocusIn)
+      document.removeEventListener("pointerdown", onNonMousePointerDown)
       window.removeEventListener("scroll", updatePosition, true)
       window.removeEventListener("resize", updatePosition)
     }
