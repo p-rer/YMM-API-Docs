@@ -86,7 +86,7 @@ export function DocsLayout({
   useEffect(() => {
     let active = true
 
-    fetch("/api/doc-tree", { cache: "force-cache" })
+    fetch("/api/doc-tree")
       .then((response) => {
         if (!response.ok) {
           throw new Error(`Navigation tree request failed: ${response.status}`)
