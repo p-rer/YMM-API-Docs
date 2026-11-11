@@ -33,6 +33,44 @@ function findFileInDir(
   return null
 }
 
+export function getAllDocSlugs(): string[] {
+  function getContentFiles(directory: string): string[] {
+    const files: string[] = []
+
+    for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+      const entryPath = path.join(directory, entry.name)
+      if (entry.isDirectory()) {
+        files.push(...getContentFiles(entryPath))
+      } else if (entry.isFile() && /\.(md|yaml|yml)$/i.test(entry.name)) {
+        files.push(entryPath)
+      }
+    }
+
+    return files
+  }
+
+  return getContentFiles(DOCS_DIRECTORY).map((file) => {
+    const relativePath = path.relative(DOCS_DIRECTORY, file)
+    const normalizedPath = relativePath.split(path.sep).join("/")
+    const withoutExtension = normalizedPath.replace(/\.(md|yaml|yml)$/i, "")
+
+    if (path.basename(withoutExtension).toLowerCase() === "index") {
+      return path.dirname(withoutExtension).split(path.sep).join("/")
+        .toLowerCase().replace(/\s+/g, "-")
+        .replace(/^\.\/$/, "")
+        .replace(/^\.$/, "")
+    }
+
+    const filename = path.basename(withoutExtension)
+    const hiddenNumber = filename.match(/^\(\d+\)~/)
+    const visibleFilename = hiddenNumber
+      ? filename.slice(hiddenNumber[0].length)
+      : filename
+    const slug = path.join(path.dirname(withoutExtension), visibleFilename)
+    return slug.split(path.sep).join("/").toLowerCase().replace(/\s+/g, "-")
+  })
+}
+
 export function readDocFileAsMarkdown(fullPath: string): string | null {
   const isYAML = fullPath.endsWith(".yaml") || fullPath.endsWith(".yml")
   const rawFile = fs.readFileSync(fullPath, "utf8")
