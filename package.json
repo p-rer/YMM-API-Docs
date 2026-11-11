@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "test:all": "pnpm run --parallel \"/^test:.*/\"",
+    "test:security-content-rendering": "tsx tests/security-content-rendering.ts",
     "test:api-docs-reference-url": "tsx tests/api-docs-reference-url.ts",
     "test:api-docs-render-type-node.test": "tsx tests/api-docs-render-type-node.test.ts",
     "test:api-docs-schema-constraints.test": "tsx tests/api-docs-schema-constraints.test.ts",
