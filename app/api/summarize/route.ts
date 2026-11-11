@@ -10,8 +10,18 @@ export const maxDuration = 10
 export const runtime = "nodejs"
 
 const RequestSchema = z.object({
-  articleId: z.string().min(1, "articleId は必須です"),
+  articleId: z.string().min(1, "articleId は必須です").max(512).refine((id) =>
+    id === "home" ||
+    (
+      !id.startsWith("/") &&
+      !id.includes("\\") &&
+      !id.includes("\0") &&
+      id.split("/").every((part) => part.length > 0 && part !== "." && part !== "..")
+    )
+  ),
 }).strict()
+
+const MAX_REQUEST_BYTES = 2048
 
 type SummarizeResponse =
   | { summary: string; cached: boolean }
@@ -65,7 +75,12 @@ const getCachedSummary = unstable_cache(
 // ---- POST ハンドラ --------------------------------------------------------
 
 export async function POST(request: Request): Promise<NextResponse<SummarizeResponse>> {
-  // JSON パース
+  // JSON パース前にリクエストサイズを制限する
+  const contentLength = Number(request.headers.get("content-length") ?? 0)
+  if (Number.isFinite(contentLength) && contentLength > MAX_REQUEST_BYTES) {
+    return NextResponse.json({ error: "リクエストボディが大きすぎます" }, { status: 413 })
+  }
+
   let body: unknown
   try {
     body = await request.json()
@@ -96,10 +111,9 @@ export async function POST(request: Request): Promise<NextResponse<SummarizeResp
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    const detail = error instanceof Error ? error.message : String(error)
-    console.log("[v0] summarize error:", detail)
+    console.error("[summarize] generation failed:", error)
     return NextResponse.json(
-      { error: `要約の生成に失敗しました: ${detail}` },
+      { error: "要約の生成に失敗しました" },
       { status: 502 },
     )
   }
