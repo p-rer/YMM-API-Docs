@@ -1,4 +1,4 @@
-import { execSync } from "child_process"
+import { execFileSync } from "child_process"
 import fs from "fs"
 import path from "path"
 import matter from "gray-matter"
@@ -18,7 +18,7 @@ import { Plugin } from 'unified';
 import { Link } from 'mdast';
 import remarkWrapHeadings from "./remarkWrapHeadings"
 import remarkRemoveFirstH1 from "./remarkRemoveFirstH1"
-import { GITHUB_REPO_BRANCH, GITHUB_REPO_NAME, GITHUB_REPO_USERNAME, IS_GITHUB_REPO_EDITABLE } from "./siteSetting"
+import remarkSafeHtml from "./remarkSafeHtml"
 import { yamlToMarkdown } from "./yaml-docs"
 import {isApiDocument, renderApiDocToMarkdown} from "@/lib/api-docs/render-api-doc";
 import remarkResolveContentImages from "./remarkResolveContentImages"
@@ -197,6 +197,7 @@ async function getDocBySlugUncached(slug: string, isHome = false) {
     try {
       const processor = remark()
         .use(remarkParse)
+        .use(remarkSafeHtml)
         .use(remarkRemoveFirstH1)
         .use(remarkLinkModifier)
         .use(remarkResolveContentImages(fullPath))
@@ -205,14 +206,14 @@ async function getDocBySlugUncached(slug: string, isHome = false) {
         .use(remarkGithubAlerts)
         .use(remarkEnsureFootnoteSeparator)
         .use(remarkWrapHeadings)
-        .use(remarkRehype, { allowDangerousHtml: true })
+        .use(remarkRehype)
         .use(rehypeShiki, {
           theme: 'aurora-x',
           addLanguageClass: true
         })
         .use(rehypeKatex)
         .use(rehypeCustomizeFootnotes)
-        .use(rehypeStringify, { allowDangerousHtml: true })
+        .use(rehypeStringify)
 
       const processedContent = await processor.process(content)
       contentHtml = replaceFootnoteBackrefSymbol(processedContent.toString())
@@ -278,9 +279,11 @@ async function getDocBySlugUncached(slug: string, isHome = false) {
     let lastUpdated
     try {
       // Get last commit time for the file
-      const gitTime = execSync(
-        `git log -1 --format="%at" -- "${fullPath}"`
-      ).toString().trim()
+      const gitTime = execFileSync(
+        "git",
+        ["log", "-1", "--format=%at", "--", fullPath],
+        { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] },
+      ).trim()
 
       // Check if Git history is available
       if (gitTime && gitTime.length > 0) {
@@ -400,9 +403,6 @@ async function getDocBySlugUncached(slug: string, isHome = false) {
       contributors,
       breadcrumbs,
       frontmatter: data,
-      githubEditUrl: IS_GITHUB_REPO_EDITABLE
-       ? `https://github.com/${GITHUB_REPO_USERNAME}/${GITHUB_REPO_NAME}/edit/${GITHUB_REPO_BRANCH}/content/` + relativePath.replaceAll("\\", "/")
-        : null
     }
   } catch (error) {
     console.error(`Error processing ${slug}:`, error)
