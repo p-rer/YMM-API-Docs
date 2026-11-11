@@ -101,7 +101,8 @@ function parseStyle(value: unknown): Record<string, string> | undefined {
       (!allowedProperties.has(property) && !/^--shiki-[a-z\d_-]+$/i.test(property)) ||
       cssValue.length === 0 ||
       cssValue.length > 160 ||
-      /url\s*\(|expression\s*\(|@import|javascript:|[<>\\u0000-\\u001f]/i.test(cssValue)
+      /url\s*\(|expression\s*\(|@import|javascript:/i.test(cssValue) ||
+      /[<>\u0000-\u001f]/.test(cssValue)
     ) {
       continue
     }
