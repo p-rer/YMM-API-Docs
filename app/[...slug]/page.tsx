@@ -1,9 +1,13 @@
 import { notFound } from "next/navigation"
-import {getAllDocPaths, getDocBySlug, getDocTree, getNextAndPrevDocs} from "@/lib/docs"
+import {getAllDocPaths, getDocBySlug, getNextAndPrevDocs} from "@/lib/docs"
+import { shouldExecuteSummary } from "@/lib/summary"
 import type { Metadata } from "next"
 import {generateOgImageFile} from "@/lib/og";
 import {format} from "date-fns";
 import { SITE_TITLE, SITE_URL } from "@/lib/siteSetting";
+
+// Reject paths that are not part of the documentation tree generated at build time.
+export const dynamicParams = false
 
 type Props = {
   params: Promise<{ slug: string[] }>
@@ -83,7 +87,6 @@ export default async function DocPage({ params }: Props) {
       notFound()
     }
 
-    const docTree = await getDocTree()
     const prevNext = await getNextAndPrevDocs(slug)
 
     // Ensure proper links for navigation
@@ -98,7 +101,6 @@ export default async function DocPage({ params }: Props) {
     return (
       <Suspense>
         <DocsLayout
-          docTree={docTree}
           toc={Array.isArray(doc.toc) ? doc.toc : []}
           title={doc.title}
           lastUpdated={doc.lastUpdated}
@@ -107,7 +109,7 @@ export default async function DocPage({ params }: Props) {
           githubRepoEditUrl={doc.githubEditUrl}
           prevNext={prevNext}
           articleId={slug || "home"}
-          summaryText={doc.markdown}
+          showSummary={shouldExecuteSummary(doc.markdown)}
         >
           <div dangerouslySetInnerHTML={{ __html: doc.content }} />
         </DocsLayout>
