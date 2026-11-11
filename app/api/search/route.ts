@@ -142,7 +142,7 @@ export async function POST(request: Request) {
     );
 
     const raw = indexRef.search(searchQuery, {
-      limit: 100,
+      limit: 20,
       enrich: true,
       suggest: true,
     }) as {
