@@ -91,14 +91,17 @@ function parseStyle(value: unknown): Record<string, string> | undefined {
   const allowedProperties = new Set([
     "color", "backgroundColor", "fontStyle", "fontWeight", "textDecoration",
     "textDecorationLine", "opacity", "display", "whiteSpace", "tabSize",
-    "lineHeight", "margin", "marginTop", "marginBottom", "padding",
+    "lineHeight", "margin", "marginTop", "marginBottom", "marginLeft", "marginRight", "padding",
     "verticalAlign", "border", "borderRadius", "fontSize", "width", "height",
   ])
   const style: Record<string, string> = {}
 
   for (const [property, cssValue] of entries) {
+    const normalizedProperty = property.startsWith("--")
+      ? property
+      : property.replace(/-([a-z])/g, (_, char: string) => char.toUpperCase())
     if (
-      (!allowedProperties.has(property) && !/^--shiki-[a-z\d_-]+$/i.test(property)) ||
+      (!allowedProperties.has(normalizedProperty) && !/^--shiki-[a-z\d_-]+$/i.test(normalizedProperty)) ||
       cssValue.length === 0 ||
       cssValue.length > 160 ||
       /url\s*\(|expression\s*\(|@import|javascript:/i.test(cssValue) ||
@@ -106,7 +109,7 @@ function parseStyle(value: unknown): Record<string, string> | undefined {
     ) {
       continue
     }
-    style[property] = cssValue
+    style[normalizedProperty] = cssValue
   }
 
   return Object.keys(style).length > 0 ? style : undefined
