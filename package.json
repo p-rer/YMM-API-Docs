@@ -93,15 +93,15 @@
     "remark-math": "^6.0.0",
     "remark-parse": "latest",
     "remark-rehype": "latest",
-    "satori": "^0.12.2",
-    "sharp": "^0.35.4",
+    "satori": "^0.33.5",
+    "sharp": "^0.35.5",
     "sonner": "^1.7.4",
     "tailwind-merge": "^2.6.1",
     "tailwindcss": "^4.3.3",
     "tailwindcss-animate": "^1.0.7",
     "unified": "^11.0.5",
     "unist-util-visit": "latest",
-    "zod": "^3.25.76"
+    "zod": "^4.6.6"
   },
   "devDependencies": {
     "@types/flexsearch": "^0.7.42",
