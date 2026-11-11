@@ -85,19 +85,41 @@ export function DocsLayout({
         toc={toc}
       />
 
-      <div className="hidden lg:flex flex-1">
-        <main className="flex-1 pl-64 w-full xl:pr-64">
-          <div className="mx-auto max-w-3xl px-8 py-8">
-            <div className="min-h-[calc(100dvh-10rem)] relative">{article}</div>
-          </div>
-        </main>
-      </div>
+      <main className="flex-1 w-full pl-0 lg:pl-64 xl:pr-64">
+        <div className="mx-auto max-w-3xl px-4 py-6 lg:px-8 lg:py-8">
+          <div className="min-h-[calc(100dvh-10rem)] relative">
+            <DocsBreadcrumbs breadcrumbs={breadcrumbs} />
+            <div className="mb-8">
+              <div className="flex items-center">
+                <h1 className="hidden lg:block min-w-0 flex-1 wrap-break-word text-3xl font-bold tracking-tight">
+                  {title}
+                </h1>
+                {githubRepoEditUrl && (
+                  <div className="hidden lg:flex items-center gap-2 m-4">
+                    <a
+                      href={githubRepoEditUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-muted-foreground hover:text-foreground"
+                    >
+                      <span aria-hidden="true">GitHub</span>
+                      <span className="sr-only">Edit on GitHub</span>
+                    </a>
+                  </div>
+                )}
+              </div>
+              <LastUpdated lastUpdated={lastUpdated} />
+              <DocContributorsList contributors={contributors} />
+            </div>
 
-      <div className="flex-1 lg:hidden">
-        <div className="container py-6">
-          {article}
+            {showSummary && articleId && <AiSummary articleId={articleId} />}
+            <div className="prose prose-slate dark:prose-invert max-w-none wrap-break-word" data-doc-content>
+              {children}
+            </div>
+            <PrevNextNav prevNext={prevNext} />
+          </div>
         </div>
-      </div>
+      </main>
 
       <CodeCopyButtons />
       <InternalLinkPreview />
