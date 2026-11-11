@@ -3,7 +3,9 @@ import { generateText } from "ai"
 import { unstable_cache } from "next/cache"
 import { NextResponse } from "next/server"
 import { z } from "zod"
-import { getDocMarkdownBySlug } from "@/lib/doc-markdown"
+import { getDocMarkdownBySlug, resolveDocPath } from "@/lib/doc-markdown"
+import { getAllDocPaths } from "@/lib/docs"
+import { readJsonBody } from "@/lib/read-json-body"
 
 export const maxDuration = 10
 
@@ -21,7 +23,6 @@ const RequestSchema = z.object({
   ),
 }).strict()
 
-const MAX_REQUEST_BYTES = 2048
 
 type SummarizeResponse =
   | { summary: string; cached: boolean }
@@ -75,21 +76,15 @@ const getCachedSummary = unstable_cache(
 // ---- POST ハンドラ --------------------------------------------------------
 
 export async function POST(request: Request): Promise<NextResponse<SummarizeResponse>> {
-  // JSON パース前にリクエストサイズを制限する
-  const contentLength = Number(request.headers.get("content-length") ?? 0)
-  if (Number.isFinite(contentLength) && contentLength > MAX_REQUEST_BYTES) {
-    return NextResponse.json({ error: "リクエストボディが大きすぎます" }, { status: 413 })
+  const body = await readJsonBody(request, 2048)
+  if (!body.success) {
+    return NextResponse.json(
+      { error: body.reason === "too-large" ? "リクエストボディが大きすぎます" : "リクエストボディが不正な JSON です" },
+      { status: body.reason === "too-large" ? 413 : 400 },
+    )
   }
 
-  let body: unknown
-  try {
-    body = await request.json()
-  } catch {
-    return NextResponse.json({ error: "リクエストボディが不正な JSON です" }, { status: 400 })
-  }
-
-  // バリデーション
-  const parsed = RequestSchema.safeParse(body)
+  const parsed = RequestSchema.safeParse(body.value)
   if (!parsed.success) {
     return NextResponse.json(
       { error: parsed.error.issues.map((i) => i.message).join(", ") },
@@ -98,6 +93,11 @@ export async function POST(request: Request): Promise<NextResponse<SummarizeResp
   }
 
   const { articleId } = parsed.data
+  const slug = articleId === "home" ? "" : articleId
+  const knownSlugs = new Set(getAllDocPaths())
+  if (!knownSlugs.has(slug) || !resolveDocPath(slug, slug === "")) {
+    return NextResponse.json({ error: "指定された記事が見つかりません" }, { status: 404 })
+  }
 
   try {
     const summary = await getCachedSummary(articleId)
