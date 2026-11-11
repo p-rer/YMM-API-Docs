@@ -1,11 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { remark } from "remark"
-import remarkParse from "remark-parse"
-import remarkGfm from "remark-gfm"
-import remarkRehype from "remark-rehype"
-import rehypeStringify from "rehype-stringify"
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
@@ -20,7 +15,6 @@ export function AiSummary({ articleId, className }: AiSummaryProps) {
   const [status, setStatus] = useState<Status>("idle")
   const [summary, setSummary] = useState("")
   const [error, setError] = useState("")
-  const [summaryHtml, setSummaryHtml] = useState("")
 
   async function handleGenerate() {
     setStatus("loading")
@@ -46,26 +40,6 @@ export function AiSummary({ articleId, className }: AiSummaryProps) {
       setStatus("error")
     }
   }
-
-  useEffect(() => {
-    async function renderMarkdown() {
-      if (!summary) {
-        setSummaryHtml("")
-        return
-      }
-
-      const file = await remark()
-        .use(remarkParse)
-        .use(remarkGfm)
-        .use(remarkRehype)
-        .use(rehypeStringify)
-        .process(summary)
-
-      setSummaryHtml(String(file))
-    }
-
-    void renderMarkdown()
-  }, [summary])
 
   return (
     <section
@@ -108,10 +82,9 @@ export function AiSummary({ articleId, className }: AiSummaryProps) {
           )}
 
           {status === "done" && (
-            <div
-              className="prose prose-sm max-w-none dark:prose-invert whitespace-pre-wrap leading-relaxed text-foreground"
-              dangerouslySetInnerHTML={{ __html: summaryHtml }}
-            />
+            <div className="prose prose-sm max-w-none dark:prose-invert whitespace-pre-wrap leading-relaxed text-foreground">
+              {summary}
+            </div>
           )}
 
           {status === "error" && <p className="text-destructive">{error}</p>}

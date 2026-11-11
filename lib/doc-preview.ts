@@ -1,20 +1,11 @@
 import { remark } from "remark"
-import remarkGfm from "remark-gfm"
 import remarkParse from "remark-parse"
-import remarkRehype from "remark-rehype"
-import rehypeStringify from "rehype-stringify"
-import remarkLinkModifier from "./docs"
-import remarkRemoveFirstH1 from "./remarkRemoveFirstH1"
+import { toString } from "mdast-util-to-string"
 
-export async function renderDocPreview(markdown: string): Promise<string> {
-  const result = await remark()
-    .use(remarkParse)
-    .use(remarkRemoveFirstH1)
-    .use(remarkLinkModifier)
-    .use(remarkGfm)
-    .use(remarkRehype, { allowDangerousHtml: true })
-    .use(rehypeStringify, { allowDangerousHtml: true })
-    .process(markdown)
-
-  return result.toString()
+export function renderDocPreview(markdown: string): string {
+  const tree = remark().use(remarkParse).parse(markdown) as any
+  return (tree.children ?? [])
+    .map((node: any) => toString(node))
+    .filter((text: string) => text.trim().length > 0)
+    .join("\n\n")
 }

@@ -1,4 +1,5 @@
-import { execSync } from "child_process"
+import { execFileSync } from "child_process"
+import { createElement, type ReactNode } from "react"
 import fs from "fs"
 import path from "path"
 import matter from "gray-matter"
@@ -10,7 +11,6 @@ import remarkRehype from "remark-rehype"
 import remarkMath from 'remark-math'
 import rehypeKatex from 'rehype-katex'
 import rehypeShiki from '@shikijs/rehype'
-import rehypeStringify from "rehype-stringify"
 import { visit } from "unist-util-visit"
 import { toString } from "mdast-util-to-string"
 import GithubSlugger from 'github-slugger'
@@ -18,7 +18,8 @@ import { Plugin } from 'unified';
 import { Link } from 'mdast';
 import remarkWrapHeadings from "./remarkWrapHeadings"
 import remarkRemoveFirstH1 from "./remarkRemoveFirstH1"
-import { GITHUB_REPO_BRANCH, GITHUB_REPO_NAME, GITHUB_REPO_USERNAME, IS_GITHUB_REPO_EDITABLE } from "./siteSetting"
+import remarkSafeHtml from "./remarkSafeHtml"
+import { hastToReact } from "./hast-to-react"
 import { yamlToMarkdown } from "./yaml-docs"
 import {isApiDocument, renderApiDocToMarkdown} from "@/lib/api-docs/render-api-doc";
 import remarkResolveContentImages from "./remarkResolveContentImages"
@@ -29,11 +30,6 @@ import {remarkEnsureFootnoteSeparator} from "@/lib/remarkEnsureFootnoteSeparator
 
 const DOCS_DIRECTORY = path.join(process.cwd(), "content")
 
-
-function replaceFootnoteBackrefSymbol(html: string): string {
-  const undo2Icon = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a4 4 0 1 1 0 8h-1"/></svg>'
-  return html.replace(/(<a[^>]*data-footnote-backref[^>]*>)([\s\S]*?)(<\/a>)/g, `$1${undo2Icon}$3`)
-}
 
 // Convert spaces to hyphens in URL paths
 function normalizePathForUrl(pathStr: string): string {
@@ -59,7 +55,7 @@ function extractHeadings() {
           headings.push({
             depth: node.depth,
             text,
-            id: slug,
+            id: `doc-${slug}`,
           })
         }
       });
@@ -193,10 +189,11 @@ async function getDocBySlugUncached(slug: string, isHome = false) {
     const { data, content } = matter(fileContents)
 
     // Process markdown content
-    let contentHtml: string
+    let contentNode: ReactNode
     try {
       const processor = remark()
         .use(remarkParse)
+        .use(remarkSafeHtml)
         .use(remarkRemoveFirstH1)
         .use(remarkLinkModifier)
         .use(remarkResolveContentImages(fullPath))
@@ -205,20 +202,20 @@ async function getDocBySlugUncached(slug: string, isHome = false) {
         .use(remarkGithubAlerts)
         .use(remarkEnsureFootnoteSeparator)
         .use(remarkWrapHeadings)
-        .use(remarkRehype, { allowDangerousHtml: true })
+        .use(remarkRehype)
         .use(rehypeShiki, {
           theme: 'aurora-x',
           addLanguageClass: true
         })
         .use(rehypeKatex)
         .use(rehypeCustomizeFootnotes)
-        .use(rehypeStringify, { allowDangerousHtml: true })
 
-      const processedContent = await processor.process(content)
-      contentHtml = replaceFootnoteBackrefSymbol(processedContent.toString())
+      const parsedContent = processor.parse(content)
+      const processedTree = await processor.run(parsedContent)
+      contentNode = hastToReact(processedTree)
     } catch (error) {
       console.error(`Error processing markdown for ${slug}:`, error)
-      contentHtml = `<p>Error processing content. Please check the markdown file.</p>`
+      contentNode = createElement("p", null, "Error processing content. Please check the markdown file.")
     }
 
     // Extract headings for table of contents separately
@@ -278,9 +275,11 @@ async function getDocBySlugUncached(slug: string, isHome = false) {
     let lastUpdated
     try {
       // Get last commit time for the file
-      const gitTime = execSync(
-        `git log -1 --format="%at" -- "${fullPath}"`
-      ).toString().trim()
+      const gitTime = execFileSync(
+        "git",
+        ["log", "-1", "--format=%at", "--", fullPath],
+        { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] },
+      ).trim()
 
       // Check if Git history is available
       if (gitTime && gitTime.length > 0) {
@@ -393,16 +392,13 @@ async function getDocBySlugUncached(slug: string, isHome = false) {
       slug,
       title,
       description,
-      content: contentHtml,
+      content: contentNode,
       markdown: content,
       toc,
       lastUpdated,
       contributors,
       breadcrumbs,
       frontmatter: data,
-      githubEditUrl: IS_GITHUB_REPO_EDITABLE
-       ? `https://github.com/${GITHUB_REPO_USERNAME}/${GITHUB_REPO_NAME}/edit/${GITHUB_REPO_BRANCH}/content/` + relativePath.replaceAll("\\", "/")
-        : null
     }
   } catch (error) {
     console.error(`Error processing ${slug}:`, error)

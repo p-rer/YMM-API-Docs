@@ -1,4 +1,4 @@
-import { getDocBySlug, getDocTree, getNextAndPrevDocs } from "@/lib/docs"
+import { getDocBySlug, getNextAndPrevDocs } from "@/lib/docs"
 import { DocsLayout } from "./docs-layout"
 import { generateOgImageFile } from "@/lib/og";
 import { SITE_DESCRIPTION, SITE_TITLE, SITE_URL } from "@/lib/siteSetting";
@@ -58,24 +58,21 @@ export default async function HomePage() {
       )
     }
 
-    const docTree = await getDocTree()
     const prevNext = await getNextAndPrevDocs("")
 
     return (
       <Suspense>
         <DocsLayout
-          docTree={docTree}
           toc={Array.isArray(doc.toc) ? doc.toc : []}
           title={doc.title}
           lastUpdated={doc.lastUpdated}
           contributors={doc.contributors}
           breadcrumbs={doc.breadcrumbs}
-          githubRepoEditUrl={doc.githubEditUrl}
           prevNext={prevNext}
           articleId=""
-          summaryText={null}
+          showSummary={false}
         >
-          <div dangerouslySetInnerHTML={{ __html: doc.content }} />
+          <div>{doc.content}</div>
         </DocsLayout>
       </Suspense>
     )

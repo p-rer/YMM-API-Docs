@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import type { Document } from "flexsearch";
+import { z } from "zod";
+import { readJsonBody } from "@/lib/read-json-body";
 
 export interface SearchIndexEntry {
   id: number;
@@ -18,12 +20,9 @@ export interface SearchResult {
   excerpt: string;
 }
 
-interface SearchRequest {
-  query: string;
-}
-
 const EXCERPT_CONTEXT = 40;
 const EXCERPT_LENGTH = 120;
+const SearchRequestSchema = z.object({ query: z.string().trim().min(1).max(200) }).strict();
 
 let indexRef: Document<any, any> | null = null;
 let bodyMapRef: Map<string, string> = new Map();
@@ -116,14 +115,19 @@ async function ensureIndex(): Promise<void> {
 
 export async function POST(request: Request) {
   try {
-    const params = (await request.json()) as SearchRequest;
-    const searchQuery = params.query?.trim();
-
-    if (!searchQuery) {
-      return NextResponse.json({
-        results: [],
-      });
+    const body = await readJsonBody(request, 4096);
+    if (!body.success) {
+      return NextResponse.json(
+        { error: body.reason === "too-large" ? "Request body too large" : "Invalid JSON request body" },
+        { status: body.reason === "too-large" ? 413 : 400 },
+      );
     }
+
+    const parsed = SearchRequestSchema.safeParse(body.value);
+    if (!parsed.success) {
+      return NextResponse.json({ error: "Invalid search query" }, { status: 400 });
+    }
+    const searchQuery = parsed.data.query;
 
     await ensureIndex();
 
@@ -142,7 +146,7 @@ export async function POST(request: Request) {
     );
 
     const raw = indexRef.search(searchQuery, {
-      limit: 100,
+      limit: 20,
       enrich: true,
       suggest: true,
     }) as {

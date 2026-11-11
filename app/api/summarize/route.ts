@@ -3,15 +3,27 @@ import { generateText } from "ai"
 import { unstable_cache } from "next/cache"
 import { NextResponse } from "next/server"
 import { z } from "zod"
-import { getDocMarkdownBySlug } from "@/lib/doc-markdown"
+import { getAllDocSlugs, getDocMarkdownBySlug } from "@/lib/doc-markdown"
+import { readJsonBody } from "@/lib/read-json-body"
 
 export const maxDuration = 10
 
 export const runtime = "nodejs"
 
+const DOCUMENT_SLUGS = new Set(getAllDocSlugs())
+
 const RequestSchema = z.object({
-  articleId: z.string().min(1, "articleId は必須です"),
+  articleId: z.string().min(1, "articleId は必須です").max(512).refine((id) =>
+    id === "home" ||
+    (
+      !id.startsWith("/") &&
+      !id.includes("\\") &&
+      !id.includes("\0") &&
+      id.split("/").every((part) => part.length > 0 && part !== "." && part !== "..")
+    )
+  ),
 }).strict()
+
 
 type SummarizeResponse =
   | { summary: string; cached: boolean }
@@ -65,16 +77,15 @@ const getCachedSummary = unstable_cache(
 // ---- POST ハンドラ --------------------------------------------------------
 
 export async function POST(request: Request): Promise<NextResponse<SummarizeResponse>> {
-  // JSON パース
-  let body: unknown
-  try {
-    body = await request.json()
-  } catch {
-    return NextResponse.json({ error: "リクエストボディが不正な JSON です" }, { status: 400 })
+  const body = await readJsonBody(request, 2048)
+  if (!body.success) {
+    return NextResponse.json(
+      { error: body.reason === "too-large" ? "リクエストボディが大きすぎます" : "リクエストボディが不正な JSON です" },
+      { status: body.reason === "too-large" ? 413 : 400 },
+    )
   }
 
-  // バリデーション
-  const parsed = RequestSchema.safeParse(body)
+  const parsed = RequestSchema.safeParse(body.value)
   if (!parsed.success) {
     return NextResponse.json(
       { error: parsed.error.issues.map((i) => i.message).join(", ") },
@@ -83,6 +94,10 @@ export async function POST(request: Request): Promise<NextResponse<SummarizeResp
   }
 
   const { articleId } = parsed.data
+  const slug = articleId === "home" ? "" : articleId
+  if (!DOCUMENT_SLUGS.has(slug)) {
+    return NextResponse.json({ error: "指定された記事が見つかりません" }, { status: 404 })
+  }
 
   try {
     const summary = await getCachedSummary(articleId)
@@ -93,13 +108,12 @@ export async function POST(request: Request): Promise<NextResponse<SummarizeResp
     }
 
     if (error instanceof MissingApiKeyError) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      return NextResponse.json({ error: "要約サービスを利用できません" }, { status: 503 })
     }
 
-    const detail = error instanceof Error ? error.message : String(error)
-    console.log("[v0] summarize error:", detail)
+    console.error("[summarize] generation failed:", error)
     return NextResponse.json(
-      { error: `要約の生成に失敗しました: ${detail}` },
+      { error: "要約の生成に失敗しました" },
       { status: 502 },
     )
   }

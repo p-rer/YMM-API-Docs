@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react"
 import { createPortal } from "react-dom"
 
 type Preview = {
-  html: string
+  text: string
   left: number
   top: number
 }
@@ -124,18 +124,18 @@ export function InternalLinkPreview() {
         )
         if (!response.ok) return
 
-        const data: { html?: unknown } = await response.json()
+        const data: { text?: unknown } = await response.json()
         if (
           id !== requestId.current ||
           anchorRef.current !== anchor ||
           !anchor.isConnected ||
-          typeof data.html !== "string" ||
-          !data.html.trim()
+          typeof data.text !== "string" ||
+          !data.text.trim()
         ) {
           return
         }
 
-        setPreview({ html: data.html, ...getPreviewPosition(anchor) })
+        setPreview({ text: data.text, ...getPreviewPosition(anchor) })
       } catch {
         // A preview failure must not interfere with normal link navigation.
       }
@@ -212,7 +212,7 @@ export function InternalLinkPreview() {
   return createPortal(
     <div
       data-internal-link-preview
-      className="prose prose-sm dark:prose-invert fixed z-50 max-h-[min(70vh,26.25rem)] w-[min(28rem,calc(100vw-1rem))] overflow-x-hidden overflow-y-auto overscroll-contain rounded-md border bg-popover p-4 text-popover-foreground shadow-lg [&_a]:pointer-events-none [&_a]:cursor-text"
+      className="prose prose-sm dark:prose-invert fixed z-50 max-h-[min(70vh,26.25rem)] w-[min(28rem,calc(100vw-1rem))] overflow-x-hidden overflow-y-auto overscroll-contain rounded-md border bg-popover p-4 text-popover-foreground shadow-lg"
       style={{ left: preview.left, top: preview.top }}
       onPointerEnter={() => {
         if (hideTimer.current !== undefined) {
@@ -229,8 +229,9 @@ export function InternalLinkPreview() {
           setPreview(null)
         }, HIDE_DELAY)
       }}
-      dangerouslySetInnerHTML={{ __html: preview.html }}
-    />,
+    >
+      <p className="m-0 whitespace-pre-wrap break-words">{preview.text}</p>
+    </div>,
     document.body,
   )
 }
