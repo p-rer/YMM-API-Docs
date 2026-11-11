@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import type { Document } from "flexsearch";
+import { z } from "zod";
 
 export interface SearchIndexEntry {
   id: number;
@@ -18,12 +19,10 @@ export interface SearchResult {
   excerpt: string;
 }
 
-interface SearchRequest {
-  query: string;
-}
-
 const EXCERPT_CONTEXT = 40;
 const EXCERPT_LENGTH = 120;
+const SearchRequestSchema = z.object({ query: z.string().trim().min(1).max(200) }).strict();
+const MAX_REQUEST_BYTES = 4096;
 
 let indexRef: Document<any, any> | null = null;
 let bodyMapRef: Map<string, string> = new Map();
@@ -116,14 +115,23 @@ async function ensureIndex(): Promise<void> {
 
 export async function POST(request: Request) {
   try {
-    const params = (await request.json()) as SearchRequest;
-    const searchQuery = params.query?.trim();
-
-    if (!searchQuery) {
-      return NextResponse.json({
-        results: [],
-      });
+    const contentLength = Number(request.headers.get("content-length") ?? 0);
+    if (Number.isFinite(contentLength) && contentLength > MAX_REQUEST_BYTES) {
+      return NextResponse.json({ error: "Request body too large" }, { status: 413 });
     }
+
+    let body: unknown;
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json({ error: "Invalid JSON request body" }, { status: 400 });
+    }
+
+    const parsed = SearchRequestSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json({ error: "Invalid search query" }, { status: 400 });
+    }
+    const searchQuery = parsed.data.query;
 
     await ensureIndex();
 
