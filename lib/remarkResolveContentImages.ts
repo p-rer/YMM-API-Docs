@@ -24,6 +24,18 @@ const remarkResolveContentImages = (filePath: string): Plugin => {
         const mdDir = path.dirname(filePath)
         const absoluteImagePath = path.resolve(mdDir, src)
         const relative = path.relative(DOCS_DIRECTORY, absoluteImagePath)
+        if (
+          relative === ".." ||
+          relative.startsWith(`..${path.sep}`) ||
+          path.isAbsolute(relative)
+        ) {
+          node.type = "text"
+          node.value = typeof node.alt === "string" ? node.alt : ""
+          delete node.url
+          delete node.alt
+          delete node.title
+          return
+        }
         node.url = "/content-images/" + relative.split(path.sep).join("/")
       })
     }
