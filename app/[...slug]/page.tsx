@@ -110,7 +110,7 @@ export default async function DocPage({ params }: Props) {
           articleId={slug || "home"}
           showSummary={shouldExecuteSummary(doc.markdown)}
         >
-          <div dangerouslySetInnerHTML={{ __html: doc.content }} />
+          <div>{doc.content}</div>
         </DocsLayout>
       </Suspense>
     )
