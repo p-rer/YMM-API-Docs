@@ -20,20 +20,40 @@ function resolveInternalRedirect(pathname: string): string {
 
 export async function GET(request: NextRequest) {
   const href = request.nextUrl.searchParams.get("href")
-  if (!href) return NextResponse.json({ html: null }, { status: 400 })
+  if (!href || href.length > 2048) {
+    return NextResponse.json({ text: null }, { status: 400 })
+  }
 
   let url: URL
   try {
     url = new URL(href, request.nextUrl.origin)
   } catch {
-    return NextResponse.json({ html: null }, { status: 400 })
+    return NextResponse.json({ text: null }, { status: 400 })
   }
-  if (url.origin !== request.nextUrl.origin) return NextResponse.json({ html: null })
+  if (url.origin !== request.nextUrl.origin) {
+    return NextResponse.json({ text: null }, { status: 400 })
+  }
 
-  const resolvedPath = resolveInternalRedirect(url.pathname)
-  const slug = decodeURIComponent(resolvedPath).replace(/^\/+|\/+$/g, "")
+  let decodedPath: string
+  try {
+    decodedPath = decodeURIComponent(url.pathname)
+  } catch {
+    return NextResponse.json({ text: null }, { status: 400 })
+  }
+
+  const resolvedPath = resolveInternalRedirect(decodedPath)
+  const slug = resolvedPath.replace(/^\/+|\/+$/g, "")
   const markdown = getDocMarkdownBySlug(slug, slug === "")
-  if (!markdown) return NextResponse.json({ html: null })
+  if (!markdown) return NextResponse.json({ text: null })
 
-  const previewMarkdown = markdown.length > 3000 ? `${markdown.slice(0, 3000).replace(/\s+$/, "")}\n\n…` : markdown\n  const html = await renderDocPreview(previewMarkdown)\n\n  return NextResponse.json({ html }, {\n    headers: {\n      "Cache-Control": "public, max-age=300, s-maxage=3600, stale-while-revalidate=86400",\n    },\n  })
+  const previewMarkdown = markdown.length > 3000
+    ? `${markdown.slice(0, 3000).replace(/\s+$/, "")}\n\n…`
+    : markdown
+  const text = renderDocPreview(previewMarkdown)
+
+  return NextResponse.json({ text }, {
+    headers: {
+      "Cache-Control": "public, max-age=300, s-maxage=3600, stale-while-revalidate=86400",
+    },
+  })
 }
