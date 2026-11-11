@@ -3,13 +3,15 @@ import { generateText } from "ai"
 import { unstable_cache } from "next/cache"
 import { NextResponse } from "next/server"
 import { z } from "zod"
-import { getDocMarkdownBySlug, resolveDocPath } from "@/lib/doc-markdown"
+import { getDocMarkdownBySlug } from "@/lib/doc-markdown"
 import { getAllDocPaths } from "@/lib/docs"
 import { readJsonBody } from "@/lib/read-json-body"
 
 export const maxDuration = 10
 
 export const runtime = "nodejs"
+
+const DOCUMENT_SLUGS = new Set(getAllDocPaths())
 
 const RequestSchema = z.object({
   articleId: z.string().min(1, "articleId は必須です").max(512).refine((id) =>
@@ -94,8 +96,7 @@ export async function POST(request: Request): Promise<NextResponse<SummarizeResp
 
   const { articleId } = parsed.data
   const slug = articleId === "home" ? "" : articleId
-  const knownSlugs = new Set(getAllDocPaths())
-  if (!knownSlugs.has(slug) || !resolveDocPath(slug, slug === "")) {
+  if (!DOCUMENT_SLUGS.has(slug)) {
     return NextResponse.json({ error: "指定された記事が見つかりません" }, { status: 404 })
   }
 
@@ -108,7 +109,7 @@ export async function POST(request: Request): Promise<NextResponse<SummarizeResp
     }
 
     if (error instanceof MissingApiKeyError) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      return NextResponse.json({ error: "要約サービスを利用できません" }, { status: 503 })
     }
 
     console.error("[summarize] generation failed:", error)
