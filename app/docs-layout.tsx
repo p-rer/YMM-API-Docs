@@ -16,6 +16,7 @@ import { DocContributorsList } from "@/components/DocContributorsList"
 import { PrevNextNav } from "@/components/PrevNextNav"
 import { SearchBox } from "@/components/SearchBox"
 import { DocTree } from "@/components/DocTree"
+import type { DocTreeNode } from "@/components/DocTree"
 import { SearchResults } from "@/components/SearchResults"
 import { TableOfContents } from "@/components/TableOfContents"
 import { CodeCopyButtons } from "@/components/CodeCopyButtons"
@@ -29,19 +30,9 @@ import { useTocIndicatorStyle } from "@/hooks/useTocIndicatorStyle"
 import { SITE_TITLE } from "@/lib/siteSetting"
 import { cn } from "@/lib/utils"
 import type { DocContributors } from "@/lib/doc-contributors"
-import { shouldExecuteSummary } from "@/lib/summary"
 import { HeadEllipsis } from "@/components/HeadEllipsis"
 import {useIsMobile} from "@/hooks/use-mobile";
 import { InternalLinkPreview } from "@/components/InternalLinkPreview"
-
-interface DocTreeNode {
-  name: string
-  isExtended: boolean
-  title?: string
-  url?: string
-  isIndex?: boolean
-  children?: DocTreeNode[]
-}
 
 interface TocItem {
   depth: number
@@ -51,7 +42,6 @@ interface TocItem {
 
 interface DocsLayoutProps {
   children: React.ReactNode
-  docTree: DocTreeNode[]
   toc: TocItem[]
   title: string
   lastUpdated: Date
@@ -63,12 +53,11 @@ interface DocsLayoutProps {
     next?: { slug: string; title: string }
   }
   articleId: string | null
-  summaryText: string | null
+  showSummary: boolean
 }
 
 export function DocsLayout({
                              children,
-                             docTree,
                              toc,
                              title,
                              lastUpdated,
@@ -77,7 +66,7 @@ export function DocsLayout({
                              githubRepoEditUrl,
                              prevNext,
                              articleId,
-                             summaryText,
+                             showSummary,
                            }: DocsLayoutProps) {
   const pathname = usePathname()
   const router = useRouter()
@@ -92,6 +81,33 @@ export function DocsLayout({
   const [suppressSearchMode, setSuppressSearchMode] = useState(fromSearch)
 
   const [isTreeHovered, setIsTreeHovered] = useState(false)
+  const [docTree, setDocTree] = useState<DocTreeNode[]>([])
+
+  useEffect(() => {
+    let active = true
+
+    fetch("/api/doc-tree", { cache: "force-cache" })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`Navigation tree request failed: ${response.status}`)
+        }
+        return response.json() as Promise<DocTreeNode[]>
+      })
+      .then((tree) => {
+        if (active && Array.isArray(tree)) {
+          setDocTree(tree)
+        }
+      })
+      .catch((error) => {
+        if (active) {
+          console.error("Failed to load documentation navigation:", error)
+        }
+      })
+
+    return () => {
+      active = false
+    }
+  }, [])
   const tocItemRefs = useRef<Map<string, HTMLAnchorElement>>(new Map())
   const tocContainerRef = useRef<HTMLDivElement | null>(null)
 
@@ -330,7 +346,7 @@ export function DocsLayout({
                   <LastUpdated lastUpdated={lastUpdated} />
                   <DocContributorsList contributors={contributors} />
                 </div>
-                {summaryText && shouldExecuteSummary(summaryText) && articleId && (
+                {showSummary && articleId && (
                   <AiSummary articleId={articleId} />
                 )}
                 <div className="prose prose-slate dark:prose-invert max-w-none" data-doc-content>
@@ -423,7 +439,7 @@ export function DocsLayout({
           </div>
           <LastUpdated lastUpdated={lastUpdated} />
           <DocContributorsList contributors={contributors} />
-          {summaryText && shouldExecuteSummary(summaryText) && articleId && (
+          {showSummary && articleId && (
             <AiSummary articleId={articleId} className="mt-4" />
           )}
           <div className="prose prose-slate dark:prose-invert max-w-none wrap-break-word" data-doc-content>
