@@ -14,7 +14,7 @@ function createSummary(value: string) {
 }
 
 function createDetailsFromMarkdown(markdown: string) {
-  const summary = markdown.match(/^\s*<summary\s*>([\s\S]*?)<\\/summary\\s*>/i)
+  const summary = markdown.match(/^\s*<summary\s*>([\s\S]*?)<\/summary\s*>/i)
   const summaryNode = summary ? createSummary(summary[1]) : createSummary("Details")
   const body = summary ? markdown.slice(summary[0].length) : markdown
   const bodyTree = parser.parse(body) as any
@@ -78,8 +78,9 @@ function transformChildren(parent: any) {
             ? next.value.trim()
             : ""
 
-          if (/^<details\s*>$/i.test(nextValue)) {
+          if (/^<details\s*>/i.test(nextValue)) {
             depth++
+            innerNodes.push(next)
             i++
             continue
           }
@@ -88,6 +89,7 @@ function transformChildren(parent: any) {
             depth--
             i++
             if (depth === 0) break
+            innerNodes.push(next)
             continue
           }
 
@@ -101,7 +103,7 @@ function transformChildren(parent: any) {
 
       if (/^<\/details\s*>$/i.test(value)) continue
 
-      const summary = value.match(/^<summary\s*>([\s\S]*?)<\\/summary\\s*>>$/i)
+      const summary = value.match(/^<summary\s*>([\s\S]*?)<\/summary\s*>$/i)
       if (summary) {
         result.push(createSummary(summary[1]))
         continue
