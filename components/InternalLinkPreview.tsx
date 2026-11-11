@@ -230,7 +230,7 @@ export function InternalLinkPreview() {
         }, HIDE_DELAY)
       }}
       <p className="m-0 whitespace-pre-wrap break-words">{preview.text}</p>
-    />,
+    </div>,
     document.body,
   )
 }
