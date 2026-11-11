@@ -97,12 +97,12 @@ export function resolveDocPath(slug: string, isHome = false): string | null {
   if (
     typeof slug !== "string" ||
     slug.length > 512 ||
-    slug.includes("\\0") ||
-    slug.includes("\\\\") ||
+    slug.includes("\0") ||
+    slug.includes("\\") ||
     path.isAbsolute(slug) ||
-    slug.split("/").some((part) => part === "." || part === ".." || part === "")
+    (slug !== "" && slug.split("/").some((part) => part === "." || part === ".." || part === ""))
   ) {
-    if (slug !== "") return null
+    return null
   }
 
   let filePath = slug
