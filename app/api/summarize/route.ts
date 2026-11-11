@@ -3,15 +3,14 @@ import { generateText } from "ai"
 import { unstable_cache } from "next/cache"
 import { NextResponse } from "next/server"
 import { z } from "zod"
-import { getDocMarkdownBySlug } from "@/lib/doc-markdown"
-import { getAllDocPaths } from "@/lib/docs"
+import { getAllDocSlugs, getDocMarkdownBySlug } from "@/lib/doc-markdown"
 import { readJsonBody } from "@/lib/read-json-body"
 
 export const maxDuration = 10
 
 export const runtime = "nodejs"
 
-const DOCUMENT_SLUGS = new Set(getAllDocPaths())
+const DOCUMENT_SLUGS = new Set(getAllDocSlugs())
 
 const RequestSchema = z.object({
   articleId: z.string().min(1, "articleId は必須です").max(512).refine((id) =>
