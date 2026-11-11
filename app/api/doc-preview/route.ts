@@ -35,5 +35,5 @@ export async function GET(request: NextRequest) {
   const markdown = getDocMarkdownBySlug(slug, slug === "")
   if (!markdown) return NextResponse.json({ html: null })
 
-  return NextResponse.json({ html: await renderDocPreview(markdown) })
+  const previewMarkdown = markdown.length > 3000 ? `${markdown.slice(0, 3000).replace(/\s+$/, "")}\n\n…` : markdown\n  const html = await renderDocPreview(previewMarkdown)\n\n  return NextResponse.json({ html }, {\n    headers: {\n      "Cache-Control": "public, max-age=300, s-maxage=3600, stale-while-revalidate=86400",\n    },\n  })
 }
