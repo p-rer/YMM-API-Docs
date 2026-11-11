@@ -13,7 +13,12 @@ const ALLOWED_TAGS = new Set([
   "details", "div", "dl", "dt", "em", "figcaption", "figure", "h1", "h2", "h3",
   "h4", "h5", "h6", "hr", "img", "li", "ol", "p", "pre", "section", "strong",
   "summary", "sup", "sub", "table", "tbody", "td", "th", "thead", "tr", "ul",
-  "span", "math", "semantics", "annotation", "annotation-xml",
+  "span", "math", "maction", "maligngroup", "malignmark", "menclose", "merror",
+  "mfenced", "mfrac", "mglyph", "mi", "mlabeledtr", "mlongdiv", "mmultiscripts",
+  "mn", "mo", "mover", "mpadded", "mphantom", "mprescripts", "mroot", "mrow",
+  "ms", "mscarries", "mscarry", "msgroup", "msline", "mspace", "msqrt", "msrow",
+  "mstack", "mstyle", "msub", "msubsup", "msup", "mtable", "mtd", "mtext", "mtr",
+  "munder", "munderover", "semantics", "annotation", "annotation-xml",
 ])
 
 const ALLOWED_PROPERTIES = new Set([
@@ -176,7 +181,7 @@ function renderNode(node: HastNode, key?: number): ReactNode {
   if (node.type !== "element" || !node.tagName) return null
 
   const tagName = node.tagName.toLowerCase()
-  if (!ALLOWED_TAGS.has(tagName) && !/^m[a-z]+$/i.test(tagName)) {
+  if (!ALLOWED_TAGS.has(tagName)) {
     return (node.children ?? []).map((child, index) => renderNode(child, index))
   }
 
