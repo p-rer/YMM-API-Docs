@@ -62,28 +62,45 @@ const PROPERTY_NAME_MAP: Record<string, string> = {
 }
 
 function parseStyle(value: unknown): Record<string, string> | undefined {
-  if (typeof value !== "string") return undefined
+  const entries: [string, string][] = []
 
+  if (typeof value === "string") {
+    for (const declaration of value.split(";")) {
+      const separator = declaration.indexOf(":")
+      if (separator <= 0) continue
+      entries.push([
+        declaration.slice(0, separator).trim(),
+        declaration.slice(separator + 1).trim(),
+      ])
+    }
+  } else if (value && typeof value === "object" && !Array.isArray(value)) {
+    for (const [property, cssValue] of Object.entries(value)) {
+      if (typeof cssValue === "string" || typeof cssValue === "number") {
+        entries.push([property, String(cssValue)])
+      }
+    }
+  } else {
+    return undefined
+  }
+
+  const allowedProperties = new Set([
+    "color", "backgroundColor", "fontStyle", "fontWeight", "textDecoration",
+    "textDecorationLine", "opacity", "display", "whiteSpace", "tabSize",
+    "lineHeight", "margin", "marginTop", "marginBottom", "padding",
+    "verticalAlign", "border", "borderRadius", "fontSize", "width", "height",
+  ])
   const style: Record<string, string> = {}
-  for (const declaration of value.split(";")) {
-    const separator = declaration.indexOf(":")
-    if (separator <= 0) continue
 
-    const property = declaration.slice(0, separator).trim()
-    const cssValue = declaration.slice(separator + 1).trim()
+  for (const [property, cssValue] of entries) {
     if (
-      !/^--[a-z\d_-]+$|^[a-z-]+$/i.test(property) ||
+      (!allowedProperties.has(property) && !/^--shiki-[a-z\d_-]+$/i.test(property)) ||
       cssValue.length === 0 ||
       cssValue.length > 160 ||
-      /url\s*\(|expression\s*\(|@import|javascript:/i.test(cssValue)
+      /url\s*\(|expression\s*\(|@import|javascript:|[<>\\u0000-\\u001f]/i.test(cssValue)
     ) {
       continue
     }
-
-    const reactProperty = property.startsWith("--")
-      ? property
-      : property.replace(/-([a-z])/g, (_, char: string) => char.toUpperCase())
-    style[reactProperty] = cssValue
+    style[property] = cssValue
   }
 
   return Object.keys(style).length > 0 ? style : undefined
@@ -130,7 +147,9 @@ function toReactProperties(properties: Record<string, unknown> = {}): Record<str
     }
 
     if (name === "rel" || name.startsWith("aria") || name.startsWith("data")) {
-      result[PROPERTY_NAME_MAP[name] ?? name] = Array.isArray(rawValue)
+      const attributeName = PROPERTY_NAME_MAP[name] ??
+        (name.startsWith("data") ? name.replace(/[A-Z]/g, (char) => `-${char.toLowerCase()}`) : name)
+      result[attributeName] = Array.isArray(rawValue)
         ? rawValue.join(" ")
         : rawValue === true && name.startsWith("data")
           ? ""
