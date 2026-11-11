@@ -38,11 +38,10 @@ interface TocItem {
 
 interface Props {
   title: string
-  githubRepoEditUrl: string | null
   toc: TocItem[]
 }
 
-export function DocsLayoutClient({ title, githubRepoEditUrl, toc }: Props) {
+export function DocsLayoutClient({ title, toc }: Props) {
   const pathname = usePathname()
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -179,12 +178,10 @@ export function DocsLayoutClient({ title, githubRepoEditUrl, toc }: Props) {
         </div>
 
         <div className="flex items-center gap-2">
-          {githubRepoEditUrl && (
-            <Link href={githubRepoEditUrl} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground">
-              <GithubIcon className="h-5 w-5" />
-              <span className="sr-only">Edit on GitHub</span>
-            </Link>
-          )}
+          <a href="https://github.com/p-rer/YMM-API-Docs/tree/master/content" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground">
+            <GithubIcon className="h-5 w-5" />
+            <span className="sr-only">View documentation source on GitHub</span>
+          </a>
           <ThemeToggle />
         </div>
 
