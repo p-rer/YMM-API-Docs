@@ -5,7 +5,7 @@ import type { Plugin } from "unified"
 const parser = remark().use(remarkParse)
 
 function createSummary(value: string) {
-  const text = value.replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim()
+  const text = value.replace(/\s+/g, " ").trim()
   return {
     type: "safeSummary",
     data: { hName: "summary" },
