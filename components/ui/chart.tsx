@@ -8,6 +8,9 @@ import { cn } from "@/lib/utils"
 // Format: { THEME_NAME: CSS_SELECTOR }
 const THEMES = { light: "", dark: ".dark" } as const
 
+const SAFE_CSS_IDENTIFIER = /^[a-zA-Z_][a-zA-Z0-9_-]*$/
+const SAFE_COLOR_VALUE = /^(?:#[\da-f]{3,8}|[a-z]{1,20}|(?:rgb|rgba|hsl|hsla|oklab|oklch|lab|lch)\([\d.%+\s,/-]+\)|(?:rgb|rgba|hsl|hsla)\(var\(--[a-z\d_-]+\)\))$/i
+
 export type ChartConfig = {
   [k in string]: {
     label?: React.ReactNode
@@ -44,7 +47,7 @@ const ChartContainer = React.forwardRef<
   }
 >(({ id, className, children, config, ...props }, ref) => {
   const uniqueId = React.useId()
-  const chartId = `chart-${id || uniqueId.replace(/:/g, "")}`
+  const chartId = `chart-${id && SAFE_CSS_IDENTIFIER.test(id) ? id : uniqueId.replace(/:/g, "")}`
 
   return (
     <ChartContext.Provider value={{ config }}>
@@ -69,35 +72,28 @@ ChartContainer.displayName = "Chart"
 
 const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
   const colorConfig = Object.entries(config).filter(
-    ([_, config]) => config.theme || config.color
+    ([key, itemConfig]) =>
+      SAFE_CSS_IDENTIFIER.test(key) && (itemConfig.theme || itemConfig.color),
   )
 
-  if (!colorConfig.length) {
-    return null
-  }
+  if (!colorConfig.length) return null
 
-  return (
-    <style
-      dangerouslySetInnerHTML={{
-        __html: Object.entries(THEMES)
-          .map(
-            ([theme, prefix]) => `
-${prefix} [data-chart=${id}] {
-${colorConfig
-  .map(([key, itemConfig]) => {
-    const color =
-      itemConfig.theme?.[theme as keyof typeof itemConfig.theme] ||
-      itemConfig.color
-    return color ? `  --color-${key}: ${color};` : null
-  })
-  .join("\n")}
-}
-`
-          )
-          .join("\n"),
-      }}
-    />
-  )
+  const cssText = Object.entries(THEMES)
+    .map(([theme, prefix]) => {
+      const variables = colorConfig.flatMap(([key, itemConfig]) => {
+        const color =
+          itemConfig.theme?.[theme as keyof typeof itemConfig.theme] ||
+          itemConfig.color
+        return typeof color === "string" && SAFE_COLOR_VALUE.test(color)
+          ? [`  --color-${key}: ${color};`]
+          : []
+      })
+
+      return `${prefix} [data-chart="${id}"] {\n${variables.join("\n")}\n}`
+    })
+    .join("\n")
+
+  return <style>{cssText}</style>
 }
 
 const ChartTooltip = RechartsPrimitive.Tooltip
