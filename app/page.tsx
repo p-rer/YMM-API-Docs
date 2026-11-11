@@ -72,7 +72,7 @@ export default async function HomePage() {
           articleId=""
           showSummary={false}
         >
-          <div>{doc.content}</div>
+          <div dangerouslySetInnerHTML={{ __html: doc.content }} />
         </DocsLayout>
       </Suspense>
     )
