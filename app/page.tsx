@@ -68,12 +68,11 @@ export default async function HomePage() {
           lastUpdated={doc.lastUpdated}
           contributors={doc.contributors}
           breadcrumbs={doc.breadcrumbs}
-          githubRepoEditUrl={doc.githubEditUrl}
           prevNext={prevNext}
           articleId=""
           showSummary={false}
         >
-          <div dangerouslySetInnerHTML={{ __html: doc.content }} />
+          <div>{doc.content}</div>
         </DocsLayout>
       </Suspense>
     )
