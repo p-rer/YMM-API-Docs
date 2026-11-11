@@ -8,7 +8,6 @@ import { CodeCopyButtons } from "@/components/CodeCopyButtons"
 import { InternalLinkPreview } from "@/components/InternalLinkPreview"
 import { DocsLayoutClient } from "@/components/DocsLayoutClient"
 import type { DocContributors } from "@/lib/doc-contributors"
-import { cn } from "@/lib/utils"
 
 interface TocItem {
   depth: number
@@ -23,7 +22,6 @@ interface DocsLayoutProps {
   lastUpdated: Date
   contributors?: DocContributors | null
   breadcrumbs: { label: string; href: string | null }[]
-  githubRepoEditUrl: string | null
   prevNext?: {
     prev?: { slug: string; title: string }
     next?: { slug: string; title: string }
@@ -39,51 +37,13 @@ export function DocsLayout({
   lastUpdated,
   contributors,
   breadcrumbs,
-  githubRepoEditUrl,
   prevNext,
   articleId,
   showSummary,
 }: DocsLayoutProps) {
-  const article = (
-    <>
-      <DocsBreadcrumbs breadcrumbs={breadcrumbs} />
-      <div className="mb-8">
-        <div className="flex items-center">
-          <h1 className="min-w-0 flex-1 wrap-break-word text-3xl font-bold tracking-tight">
-            {title}
-          </h1>
-          {githubRepoEditUrl && (
-            <div className="flex items-center gap-2 m-4">
-              <a
-                href={githubRepoEditUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-muted-foreground hover:text-foreground"
-              >
-                <span aria-hidden="true">GitHub</span>
-                <span className="sr-only">Edit on GitHub</span>
-              </a>
-            </div>
-          )}
-        </div>
-        <LastUpdated lastUpdated={lastUpdated} />
-        <DocContributorsList contributors={contributors} />
-      </div>
-      {showSummary && articleId && <AiSummary articleId={articleId} />}
-      <div className="prose prose-slate dark:prose-invert max-w-none wrap-break-word" data-doc-content>
-        {children}
-      </div>
-      <PrevNextNav prevNext={prevNext} />
-    </>
-  )
-
   return (
     <div className="flex min-h-dvh flex-col">
-      <DocsLayoutClient
-        title={title}
-        githubRepoEditUrl={githubRepoEditUrl}
-        toc={toc}
-      />
+      <DocsLayoutClient title={title} toc={toc} />
 
       <main className="flex-1 w-full pl-0 lg:pl-64 xl:pr-64">
         <div className="mx-auto max-w-3xl px-4 py-6 lg:px-8 lg:py-8">
@@ -94,19 +54,17 @@ export function DocsLayout({
                 <h1 className="hidden lg:block min-w-0 flex-1 wrap-break-word text-3xl font-bold tracking-tight">
                   {title}
                 </h1>
-                {githubRepoEditUrl && (
-                  <div className="hidden lg:flex items-center gap-2 m-4">
-                    <a
-                      href={githubRepoEditUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-muted-foreground hover:text-foreground"
-                    >
-                      <span aria-hidden="true">GitHub</span>
-                      <span className="sr-only">Edit on GitHub</span>
-                    </a>
-                  </div>
-                )}
+                <div className="hidden lg:flex items-center gap-2 m-4">
+                  <a
+                    href="https://github.com/p-rer/YMM-API-Docs/tree/master/content"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-muted-foreground hover:text-foreground"
+                  >
+                    <span aria-hidden="true">GitHub</span>
+                    <span className="sr-only">View documentation source on GitHub</span>
+                  </a>
+                </div>
               </div>
               <LastUpdated lastUpdated={lastUpdated} />
               <DocContributorsList contributors={contributors} />
